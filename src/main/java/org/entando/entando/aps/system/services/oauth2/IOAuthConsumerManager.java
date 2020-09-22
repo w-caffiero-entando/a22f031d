@@ -17,6 +17,8 @@ import com.agiletec.aps.system.common.FieldSearchFilter;
 import org.entando.entando.ent.exception.EntException;
 import org.entando.entando.aps.system.services.oauth2.model.ConsumerRecordVO;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 
@@ -24,9 +26,9 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
  * @author E.Santoboni
  */
 public interface IOAuthConsumerManager extends ClientDetailsService {
-    
-    public static final String[] GRANT_TYPES = { "authorization_code", 
-        "client_credentials", "implicit", "password", "refresh_token"};
+
+    public static final List<String> GRANT_TYPES = Collections.unmodifiableList(Arrays.asList ("authorization_code",
+        "client_credentials", "implicit", "password", "refresh_token"));
 
     public static final String CONSUMER_KEY_FILTER_KEY = "consumerkey";
     public static final String CONSUMER_SECRET_FILTER_KEY = "consumersecret";
