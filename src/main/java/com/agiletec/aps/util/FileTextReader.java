@@ -97,13 +97,13 @@ public class FileTextReader {
 
     public static File createTempFile(String filename, InputStream is) throws IOException {
         String tempDir = System.getProperty("java.io.tmpdir");
-        String filePath = tempDir + File.separator + filename;
+        File filePath = new File(tempDir + File.separator + filename);
         FileOutputStream outStream = null;
         try {
             byte[] buffer = new byte[1024];
             int length = -1;
             // PATH-TRAVERSAL-CHECK
-            if (!FileUtils.directoryContains(new File(tempDir), new File(filePath))) {
+            if (!FileUtils.directoryContains(new File(tempDir), filePath)) {
                 throw new EntRuntimeException(
                         String.format("Path validation failed: \"%s\" not in \"%s\"", filePath, tempDir)
                 );
@@ -125,7 +125,7 @@ public class FileTextReader {
                 is.close();
             }
         }
-        return new File(filePath);
+        return filePath;
     }
 
     public static byte[] fileToByteArray(File file) throws IOException {
