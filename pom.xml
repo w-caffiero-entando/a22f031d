@@ -11,7 +11,7 @@
     <artifactId>entando-engine</artifactId>
     <packaging>jar</packaging>
     <version>6.2.0-SNAPSHOT</version>
-    <name>Entando Core: Engine</name>
+    <name>Entando Engine Scan Test</name>
     <description>Entando Engine: an agile, modern and user-centric open source Portal platform.</description>
     <url>http://www.entando.com/</url>
     <licenses>
@@ -38,6 +38,9 @@
         </repository>
     </repositories>
     <properties>
+        <sonar.projectKey>entando_repository-scan-test</sonar.projectKey>
+        <sonar.organization>entando</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <checkstyle.skip>true</checkstyle.skip>
     </properties>
