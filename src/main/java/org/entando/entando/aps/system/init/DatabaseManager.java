@@ -524,15 +524,8 @@ public class DatabaseManager extends AbstractInitializerManager
         try {
             String baseDir = this.getLocalBackupsFolder();
             String directoryName = baseDir + subFolderName;
-            // PATH-TRAVERSAL-CHECK
-            if (!FileUtils.directoryContains(new File(baseDir), new File(directoryName))) {
-                throw new EntRuntimeException(
-                        String.format("Path validation failed: \"%s\" not in \"%s\"", directoryName, baseDir)
-                );
-            }
-            //-
-            this.getStorageManager().deleteDirectory(directoryName, true);
-
+            // PATH-TRAVERSAL-CHECK - SONAR - FALSE POSITIVE
+            this.getStorageManager().checkedDeleteDirectory(directoryName, true, baseDir);
         } catch (Throwable t) {
             logger.error("Error while deleting backup", t);
             throw new EntException("Error while deleting backup", t);

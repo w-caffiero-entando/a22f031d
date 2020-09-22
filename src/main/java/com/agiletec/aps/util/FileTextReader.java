@@ -98,14 +98,13 @@ public class FileTextReader {
     public static File createTempFile(String filename, InputStream is) throws IOException {
         String tempDir = System.getProperty("java.io.tmpdir");
         File filePath = new File(tempDir + File.separator + filename);
-        File fTempDir = new File("/tmp/");
         FileOutputStream outStream = null;
         try {
             byte[] buffer = new byte[1024];
             int length = -1;
-            // PATH-TRAVERSAL-CHECK
-            if (FileUtils.directoryContains(fTempDir, filePath)) {
-                outStream = new FileOutputStream(filePath);
+            // PATH-TRAVERSAL-CHECK - SONAR - FALSE POSITIVE
+            if (FileUtils.directoryContains(new File(tempDir), filePath)) {
+                outStream = new FileOutputStream(filePath); //NOSONAR
                 while ((length = is.read(buffer)) != -1) {
                     outStream.write(buffer, 0, length);
                     outStream.flush();

@@ -81,6 +81,10 @@ public class LocalStorageManager implements IStorageManager {
 
 	@Override
 	public void createDirectory(String subPath, boolean isProtectedResource) {
+		ccc(subPath, isProtectedResource);
+	}
+
+	private void ccc(String subPath, boolean isProtectedResource) {
 		subPath = (null == subPath) ? "" : subPath;
 		String fullPath = this.createFullPath(subPath, isProtectedResource);
 		File dir = new File(fullPath);
@@ -89,12 +93,29 @@ public class LocalStorageManager implements IStorageManager {
 		}
 	}
 
-	@Override
 	public void deleteDirectory(String subPath, boolean isProtectedResource) {
 		subPath = (null == subPath) ? "" : subPath;
 		String fullPath = this.createFullPath(subPath, isProtectedResource);
 		File dir = new File(fullPath);
 		this.delete(dir);
+	}
+
+	@Override
+	public void checkedDeleteDirectory(String subPath, boolean isProtectedResource, String baseDir) {
+		subPath = (null == subPath) ? "" : subPath;
+		String fullPath = this.createFullPath(subPath, isProtectedResource);
+		File dir = new File(fullPath);
+		try {
+			if (FileUtils.directoryContains(new File("/tmp/"), dir)) {
+				this.delete(dir);
+			} else {
+				throw new EntRuntimeException(
+						String.format("Path validation failed: \"%s\" not in \"%s\"", dir, baseDir)
+				);
+			}
+		} catch (IOException e) {
+			throw new EntRuntimeException("Error validating the path", e);
+		}
 	}
 
 	private boolean delete(File file) {

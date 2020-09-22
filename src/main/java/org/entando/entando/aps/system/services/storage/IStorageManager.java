@@ -31,7 +31,9 @@ public interface IStorageManager extends Serializable {
 	public void createDirectory(String subPath, boolean isProtectedResource) throws EntException;
 	
 	public void deleteDirectory(String subPath, boolean isProtectedResource) throws EntException;
-	
+
+	public void checkedDeleteDirectory(String subPath, boolean isProtectedResource, String baseDir) throws EntException;
+
 	public InputStream getStream(String subPath, boolean isProtectedResource) throws EntException;
 	
 	public String getResourceUrl(String subPath, boolean isProtectedResource);
