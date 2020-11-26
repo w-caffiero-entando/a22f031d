@@ -77,10 +77,11 @@ public class LocalStorageManager implements IStorageManager {
 		String diskRoot = (!isProtectedResource) ? this.getBaseDiskRoot() : this.getProtectedBaseDiskRoot();
 		String fullPath = this.createFullPath(subPath, isProtectedResource);
 		try {
-			if (FileUtils.directoryContains(new File(diskRoot), new File(subPath))) {
-				File file = new File(fullPath);
-				if (file.exists()) {
-					return file.delete();
+			File fileUnsafe = new File(fullPath);
+			File directory = new File(diskRoot);
+			if (FileUtils.directoryContains(directory, fileUnsafe)) {
+				if (fileUnsafe.exists()) {
+					return fileUnsafe.delete();
 				}
 			} else {
 				throw new IOException(
@@ -119,9 +120,10 @@ public class LocalStorageManager implements IStorageManager {
 		String fullPath = this.createFullPath(subPath, isProtectedResource);
 		String diskRoot = (!isProtectedResource) ? this.getBaseDiskRoot() : this.getProtectedBaseDiskRoot();
 		try {
-			if (FileUtils.directoryContains(new File(diskRoot), new File(subPath))) {
-				File dir = new File(fullPath);
-				this.delete(dir);
+			File targetDir = new File(fullPath);
+			File baseDir = new File(diskRoot);
+			if (FileUtils.directoryContains(baseDir, targetDir)) {
+				this.delete(targetDir);
 			} else {
 				throw new IOException(
 						String.format("Path validation failed: \"%s\" not in \"%s\"", diskRoot, subPath)
@@ -161,7 +163,6 @@ public class LocalStorageManager implements IStorageManager {
 			String fullPath = this.createFullPath(subPath, isProtectedResource);
 			String diskRoot = (!isProtectedResource) ? this.getBaseDiskRoot() : this.getProtectedBaseDiskRoot();
 			File file = new File(fullPath);
-
 			if (FileUtils.directoryContains(new File(diskRoot), file)) {
 				if (file.exists() && !file.isDirectory()) {
 					return new FileInputStream(file);
@@ -344,8 +345,8 @@ public class LocalStorageManager implements IStorageManager {
 		String fullPath = this.createFullPath(subPath, isProtectedResource);
 		String diskRoot = (!isProtectedResource) ? this.getBaseDiskRoot() : this.getProtectedBaseDiskRoot();
 
-		File directory = new File(fullPath);
 		try {
+			File directory = new File(fullPath);
 			if (FileUtils.directoryContains(new File(diskRoot), directory)) {
 				if (directory.exists() && directory.isDirectory()) {
 					BasicFileAttributeView[] objects = new BasicFileAttributeView[]{};
