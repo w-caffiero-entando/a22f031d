@@ -72,8 +72,17 @@ public class WidgetCatalog {
 			dataType = DataType.STRING,
 			width = 150)
 	private String bundleId;
-	
-	public static final String TABLE_NAME = "widgetcatalog";
+
+	@DatabaseField(columnName = "readonlypagewidgetconfig",
+			dataType = DataType.SHORT)
+	private short readonlyPageWidgetConfig;
+
+    @DatabaseField(columnName = "widgetcategory",
+            dataType = DataType.STRING,
+            width = 80)
+    private String widgetCategory;
+
+    public static final String TABLE_NAME = "widgetcatalog";
 	
 }
 /*
@@ -89,6 +98,8 @@ CREATE TABLE widgetcatalog
   maingroup character varying(20),
   configui character varying,
   bundleid character varying(150),
+  readonlypagewidgetconfig smallint,
+  widgetcategory character varying(80),
   CONSTRAINT showletcatalog_pkey PRIMARY KEY (code )
 )
  */

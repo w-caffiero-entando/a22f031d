@@ -40,9 +40,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.entando.entando.web.userprofile.model.ProfileTypeRefreshRequest;
 
 public class ProfileTypeControllerIntegrationTest extends AbstractControllerIntegrationTest {
 
@@ -55,7 +58,7 @@ public class ProfileTypeControllerIntegrationTest extends AbstractControllerInte
     @Autowired
     @InjectMocks
     private ProfileTypeController controller;
-
+    
     @Test
     public void testGetUserProfileTypes() throws Exception {
         UserDetails user = new OAuth2TestUtils.UserBuilder("jack_bauer", "0x24").grantedToRoleAdmin().build();
@@ -216,7 +219,7 @@ public class ProfileTypeControllerIntegrationTest extends AbstractControllerInte
             }
         }
     }
-
+    
     private ResultActions executeProfileTypePost(String fileName, String accessToken, ResultMatcher expected) throws Exception {
         InputStream isJsonPostValid = this.getClass().getResourceAsStream(fileName);
         String jsonPostValid = FileTextReader.getText(isJsonPostValid);
@@ -240,7 +243,7 @@ public class ProfileTypeControllerIntegrationTest extends AbstractControllerInte
         result.andExpect(expected);
         return result;
     }
-
+    
     // attributes
     @Test
     public void testGetUserProfileAttributeTypes_1() throws Exception {
@@ -264,8 +267,8 @@ public class ProfileTypeControllerIntegrationTest extends AbstractControllerInte
         result.andExpect(status().isOk());
         result.andExpect(jsonPath("$.payload", Matchers.hasSize(5)));
         result.andExpect(jsonPath("$.metaData.pageSize", is(5)));
-        result.andExpect(jsonPath("$.metaData.lastPage", is(3)));
-        result.andExpect(jsonPath("$.metaData.totalItems", is(15)));
+        result.andExpect(jsonPath("$.metaData.lastPage", is(4)));
+        result.andExpect(jsonPath("$.metaData.totalItems", is(16)));
         result.andExpect(jsonPath("$.payload[0]", is("Timestamp")));
     }
 
@@ -285,7 +288,7 @@ public class ProfileTypeControllerIntegrationTest extends AbstractControllerInte
         result.andExpect(jsonPath("$.metaData.totalItems", is(4)));
         result.andExpect(jsonPath("$.payload[0]", is("Hypertext")));
     }
-
+    
     @Test
     public void testGetUserProfileAttributeType_1() throws Exception {
         UserDetails user = new OAuth2TestUtils.UserBuilder("jack_bauer", "0x24").grantedToRoleAdmin().build();
@@ -295,6 +298,9 @@ public class ProfileTypeControllerIntegrationTest extends AbstractControllerInte
                         .header("Authorization", "Bearer " + accessToken));
         result.andExpect(status().isOk());
         result.andExpect(jsonPath("$.payload.code", is("Monotext")));
+        result.andExpect(jsonPath("$.payload.multilingual", is(false)));
+        result.andExpect(jsonPath("$.payload.dateFilterSupported", is(false)));
+        result.andExpect(jsonPath("$.payload.allowedRoles", Matchers.hasSize(4)));
         result.andExpect(jsonPath("$.payload.simple", is(true)));
         result.andExpect(jsonPath("$.errors", Matchers.hasSize(0)));
         result.andExpect(jsonPath("$.metaData.size()", is(0)));
@@ -313,6 +319,35 @@ public class ProfileTypeControllerIntegrationTest extends AbstractControllerInte
         result.andExpect(jsonPath("$.metaData.size()", is(0)));
     }
 
+    @Test
+    public void testGetUserProfileAttributeType_3() throws Exception {
+        UserDetails user = new OAuth2TestUtils.UserBuilder("jack_bauer", "0x24").grantedToRoleAdmin().build();
+        String accessToken = mockOAuthInterceptor(user);
+        ResultActions result = mockMvc
+                .perform(get("/profileTypeAttributes/{profileTypeCode}/attribute/{attributeTypeCode}", new Object[]{"XXX", "Monotext"})
+                        .header("Authorization", "Bearer " + accessToken));
+        result.andExpect(status().isNotFound());
+        result.andExpect(jsonPath("$.payload", Matchers.hasSize(0)));
+        result.andExpect(jsonPath("$.errors", Matchers.hasSize(1)));
+        result.andExpect(jsonPath("$.errors[0].code", is("1")));
+        result.andExpect(jsonPath("$.metaData.size()", is(0)));
+
+        result = mockMvc
+                .perform(get("/profileTypeAttributes/{profileTypeCode}/attribute/{attributeTypeCode}", new Object[]{"PFL", "Monotext"})
+                        .header("Authorization", "Bearer " + accessToken));
+        result.andExpect(status().isOk());
+        result.andExpect(jsonPath("$.payload.multilingual", is(false)));
+        result.andExpect(jsonPath("$.payload.dateFilterSupported", is(false)));
+        result.andExpect(jsonPath("$.payload.assignedRoles.size()", is(2)));
+        result.andExpect(jsonPath("$.payload.assignedRoles.userprofile:fullname", is("fullname")));
+        result.andExpect(jsonPath("$.payload.assignedRoles.userprofile:email", is("email")));
+        result.andExpect(jsonPath("$.payload.allowedRoles", Matchers.hasSize(4)));
+        result.andExpect(jsonPath("$.payload.dateFilterSupported", is(false)));
+        result.andExpect(jsonPath("$.payload.simple", is(true)));
+        result.andExpect(jsonPath("$.errors", Matchers.hasSize(0)));
+        result.andExpect(jsonPath("$.metaData.size()", is(0)));
+    }
+    
     // ------------------------------------
     @Test
     public void testGetUserProfileAttribute() throws Exception {
@@ -494,7 +529,7 @@ public class ProfileTypeControllerIntegrationTest extends AbstractControllerInte
             }
         }
     }
-
+    
     private ResultActions executeProfileAttributePost(String fileName, String typeCode, String accessToken, ResultMatcher expected) throws Exception {
         InputStream isJsonPostValid = this.getClass().getResourceAsStream(fileName);
         String jsonPostValid = FileTextReader.getText(isJsonPostValid);
@@ -506,7 +541,7 @@ public class ProfileTypeControllerIntegrationTest extends AbstractControllerInte
         result.andExpect(expected);
         return result;
     }
-
+    
     private ResultActions executeProfileAttributePut(String fileName, String typeCode, String attributeCode, String accessToken, ResultMatcher expected) throws Exception {
         InputStream isJsonPutValid = this.getClass().getResourceAsStream(fileName);
         String jsonPutValid = FileTextReader.getText(isJsonPutValid);
@@ -518,7 +553,7 @@ public class ProfileTypeControllerIntegrationTest extends AbstractControllerInte
         result.andExpect(expected);
         return result;
     }
-
+    
     private ResultActions executeProfileAttributeDelete(String typeCode,
             String attributeCode, String accessToken, ResultMatcher expected) throws Exception {
         ResultActions result = mockMvc
@@ -527,7 +562,7 @@ public class ProfileTypeControllerIntegrationTest extends AbstractControllerInte
         result.andExpect(expected);
         return result;
     }
-
+    
     @Test
     public void testGetUserProfileTypesStatus() throws Exception {
         UserDetails user = new OAuth2TestUtils.UserBuilder("jack_bauer", "0x24").grantedToRoleAdmin().build();
@@ -538,7 +573,7 @@ public class ProfileTypeControllerIntegrationTest extends AbstractControllerInte
                         .header("Authorization", "Bearer " + accessToken));
         result.andExpect(status().isOk());
         result.andExpect(jsonPath("$.payload.size()", is(3)));
-        result.andExpect(jsonPath("$.payload.ready", Matchers.hasSize(1)));
+        result.andExpect(jsonPath("$.payload.ready", Matchers.hasSize(3)));
         result.andExpect(jsonPath("$.payload.toRefresh", Matchers.hasSize(0)));
         result.andExpect(jsonPath("$.payload.refreshing", Matchers.hasSize(0)));
         result.andExpect(jsonPath("$.errors", Matchers.hasSize(0)));
@@ -546,7 +581,7 @@ public class ProfileTypeControllerIntegrationTest extends AbstractControllerInte
     }
 
     @Test
-    public void testRefreshUserProfileTypes() throws Exception {
+    public void testRefreshUserProfileType_1() throws Exception {
         UserDetails user = new OAuth2TestUtils.UserBuilder("jack_bauer", "0x24").grantedToRoleAdmin().build();
         String accessToken = mockOAuthInterceptor(user);
         ResultActions result = mockMvc
@@ -571,7 +606,7 @@ public class ProfileTypeControllerIntegrationTest extends AbstractControllerInte
     }
 
     @Test
-    public void testRefreshUserProfileType() throws Exception {
+    public void testRefreshUserProfileType_2() throws Exception {
         String typeCode = "TST";
         try {
             Assert.assertNull(this.userProfileManager.getEntityPrototype(typeCode));
@@ -608,7 +643,74 @@ public class ProfileTypeControllerIntegrationTest extends AbstractControllerInte
             }
         }
     }
-
+    
+    @Test
+    public void testRefreshUserProfileType_3() throws Exception {
+        String typeCode = "TST";
+        try {
+            UserDetails user = new OAuth2TestUtils.UserBuilder("jack_bauer", "0x24").grantedToRoleAdmin().build();
+            String accessToken = mockOAuthInterceptor(user);
+            
+            this.checkStatus(3, 0, accessToken);
+            Assert.assertNull(this.userProfileManager.getEntityPrototype(typeCode));
+            
+            this.executeProfileTypePost("2_POST_valid.json", accessToken, status().isOk());
+            Assert.assertNotNull(this.userProfileManager.getEntityPrototype(typeCode));
+            this.checkStatus(4, 0, accessToken);
+            
+            ResultActions result = this.executeProfileAttributePut("10_PUT_attribute_valid_1.json", typeCode, "DataAttribute", accessToken, status().isOk());
+            this.checkStatus(4, 0, accessToken);
+            
+            result = this.executeProfileAttributePut("10_PUT_attribute_valid_2.json", typeCode, "DataAttribute", accessToken, status().isOk());
+            this.checkStatus(3, 1, accessToken);
+            
+            ProfileTypeRefreshRequest request = new ProfileTypeRefreshRequest();
+            request.getProfileTypeCodes().add(typeCode);
+            ResultActions resultRefresh = mockMvc
+                .perform(post("/profileTypesStatus")
+                        .content(new ObjectMapper().writeValueAsString(request))
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .header("Authorization", "Bearer " + accessToken));
+            resultRefresh.andExpect(status().isOk());
+            synchronized (this) {
+                this.wait(1000);
+            }
+            this.checkStatus(4, 0, accessToken);
+            
+            result = this.executeProfileAttributePut("10_PUT_attribute_valid_1.json", typeCode, "DataAttribute", accessToken, status().isOk());
+            this.checkStatus(3, 1, accessToken);
+            
+            resultRefresh = mockMvc
+                .perform(post("/profileTypes/refresh/{profileTypeCode}", new Object[]{typeCode})
+                        .content(new ObjectMapper().writeValueAsString(request))
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .header("Authorization", "Bearer " + accessToken));
+            resultRefresh.andExpect(status().isOk());
+            synchronized (this) {
+                this.wait(1000);
+            }
+            this.checkStatus(4, 0, accessToken);
+        } finally {
+            if (null != this.userProfileManager.getEntityPrototype(typeCode)) {
+                ((IEntityTypesConfigurer) this.userProfileManager).removeEntityPrototype(typeCode);
+            }
+        }
+    }
+    
+    private void checkStatus(int expectedReady, int expectedToRefresh, String accessToken) throws Exception {
+        ResultActions result = mockMvc
+                .perform(get("/profileTypesStatus")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .header("Authorization", "Bearer " + accessToken));
+        result.andExpect(status().isOk());
+        result.andExpect(jsonPath("$.payload.size()", is(3)));
+        result.andExpect(jsonPath("$.payload.ready", Matchers.hasSize(expectedReady)));
+        result.andExpect(jsonPath("$.payload.toRefresh", Matchers.hasSize(expectedToRefresh)));
+        result.andExpect(jsonPath("$.payload.refreshing", Matchers.hasSize(0)));
+        result.andExpect(jsonPath("$.errors", Matchers.hasSize(0)));
+        result.andExpect(jsonPath("$.metaData.size()", is(0)));
+    }
+    
     @Test
     public void testGetUserProfileTypesWithAdminPermission() throws Exception {
         UserDetails user = new OAuth2TestUtils.UserBuilder("jack_bauer", "0x24").grantedToRoleAdmin().build();
@@ -662,4 +764,73 @@ public class ProfileTypeControllerIntegrationTest extends AbstractControllerInte
         result.andExpect(status().isOk());
     }
 
+    @Test
+    public void testAddUpdateDeleteUserProfileAttributeWithRegex() throws Exception {
+        String typeCode = "REX";
+        try {
+            Assert.assertNull(this.userProfileManager.getEntityPrototype(typeCode));
+            UserDetails user = new OAuth2TestUtils.UserBuilder("jack_bauer", "0x24").grantedToRoleAdmin().build();
+            String accessToken = mockOAuthInterceptor(user);
+
+            InputStream isJsonPostValid = this.getClass().getResourceAsStream("8_POST_regex.json");
+            String jsonPostValid = FileTextReader.getText(isJsonPostValid);
+            ResultActions result = mockMvc
+                    .perform(post("/profileTypes")
+                            .content(jsonPostValid)
+                            .contentType(MediaType.APPLICATION_JSON_VALUE)
+                            .header("Authorization", "Bearer " + accessToken));
+            result.andExpect(status().isOk())
+                    .andDo(print())
+                    .andExpect(jsonPath("$.payload.attributes.size()", Matchers.is(4)))
+                    .andExpect(jsonPath("$.payload.attributes[0].code", Matchers.is("text")))
+                    .andExpect(jsonPath("$.payload.attributes[0].validationRules.minLength", Matchers.is(10)))
+                    .andExpect(jsonPath("$.payload.attributes[0].validationRules.maxLength", Matchers.is(20)))
+                    .andExpect(jsonPath("$.payload.attributes[0].validationRules.regex", Matchers.is("text regex")))
+                    .andExpect(jsonPath("$.payload.attributes[1].code", Matchers.is("longtext")))
+                    .andExpect(jsonPath("$.payload.attributes[1].validationRules.minLength", Matchers.is(10)))
+                    .andExpect(jsonPath("$.payload.attributes[1].validationRules.maxLength", Matchers.is(20)))
+                    .andExpect(jsonPath("$.payload.attributes[1].validationRules.regex", Matchers.is("longtext regex")))
+                    .andExpect(jsonPath("$.payload.attributes[2].code", Matchers.is("monotext")))
+                    .andExpect(jsonPath("$.payload.attributes[2].validationRules.minLength", Matchers.is(10)))
+                    .andExpect(jsonPath("$.payload.attributes[2].validationRules.maxLength", Matchers.is(20)))
+                    .andExpect(jsonPath("$.payload.attributes[2].validationRules.regex", Matchers.is("monotext regex")))
+                    .andExpect(jsonPath("$.payload.attributes[3].code", Matchers.is("hypertext")))
+                    .andExpect(jsonPath("$.payload.attributes[3].validationRules.minLength", Matchers.is(10)))
+                    .andExpect(jsonPath("$.payload.attributes[3].validationRules.maxLength", Matchers.is(20)))
+                    .andExpect(jsonPath("$.payload.attributes[3].validationRules.regex", Matchers.is("hypertext regex")));
+
+            isJsonPostValid = this.getClass().getResourceAsStream("8_PUT_regex.json");
+            jsonPostValid = FileTextReader.getText(isJsonPostValid);
+            result = mockMvc
+                    .perform(put("/profileTypes/{profileTypeCode}", new Object[]{typeCode})
+                            .content(jsonPostValid)
+                            .contentType(MediaType.APPLICATION_JSON_VALUE)
+                            .header("Authorization", "Bearer " + accessToken));
+            result.andExpect(status().isOk())
+                    .andDo(print())
+                    .andExpect(jsonPath("$.payload.attributes.size()", Matchers.is(4)))
+                    .andExpect(jsonPath("$.payload.attributes[0].code", Matchers.is("text")))
+                    .andExpect(jsonPath("$.payload.attributes[0].validationRules.minLength", Matchers.is(11)))
+                    .andExpect(jsonPath("$.payload.attributes[0].validationRules.maxLength", Matchers.is(21)))
+                    .andExpect(jsonPath("$.payload.attributes[0].validationRules.regex", Matchers.is("text regex 2")))
+                    .andExpect(jsonPath("$.payload.attributes[1].code", Matchers.is("longtext")))
+                    .andExpect(jsonPath("$.payload.attributes[1].validationRules.minLength", Matchers.is(11)))
+                    .andExpect(jsonPath("$.payload.attributes[1].validationRules.maxLength", Matchers.is(21)))
+                    .andExpect(jsonPath("$.payload.attributes[1].validationRules.regex", Matchers.is("longtext regex 2")))
+                    .andExpect(jsonPath("$.payload.attributes[2].code", Matchers.is("monotext")))
+                    .andExpect(jsonPath("$.payload.attributes[2].validationRules.minLength", Matchers.is(11)))
+                    .andExpect(jsonPath("$.payload.attributes[2].validationRules.maxLength", Matchers.is(21)))
+                    .andExpect(jsonPath("$.payload.attributes[2].validationRules.regex", Matchers.is("monotext regex 2")))
+                    .andExpect(jsonPath("$.payload.attributes[3].code", Matchers.is("hypertext")))
+                    .andExpect(jsonPath("$.payload.attributes[3].validationRules.minLength", Matchers.is(11)))
+                    .andExpect(jsonPath("$.payload.attributes[3].validationRules.maxLength", Matchers.is(21)))
+                    .andExpect(jsonPath("$.payload.attributes[3].validationRules.regex", Matchers.is("hypertext regex 2")));
+
+        } finally {
+            if (null != this.userProfileManager.getEntityPrototype(typeCode)) {
+                ((IEntityTypesConfigurer) this.userProfileManager).removeEntityPrototype(typeCode);
+            }
+        }
+    }
+    
 }

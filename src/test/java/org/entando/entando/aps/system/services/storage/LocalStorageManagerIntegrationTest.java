@@ -21,8 +21,12 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
+import org.entando.entando.aps.system.init.DatabaseManager;
+import org.entando.entando.ent.exception.EntRuntimeException;
 import org.entando.entando.ent.util.EntLogging.EntLogger;
 import org.entando.entando.ent.util.EntLogging.EntLogFactory;
 
@@ -138,6 +142,17 @@ public class LocalStorageManagerIntegrationTest extends BaseTestCase {
             this._localStorageManager.deleteDirectory("testfolder/", false);
             InputStream streamBis = this._localStorageManager.getStream(testFilePath, false);
             assertNull(streamBis);
+        }
+    }
+
+    public void testCreateDirectoryShouldBlockPathTraversals() throws Throwable {
+        try {
+            this._localStorageManager.createDirectory("/../../../dev/mydir", false);
+            assert(false);
+        } catch (EntRuntimeException t) {
+            assertEquals("Path traversal detected", t.getCause().getMessage());
+        } catch (Throwable t) {
+            assert(false);
         }
     }
 

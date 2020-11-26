@@ -17,5 +17,8 @@ public interface IPageTokenManager {
 
 	public static final String PREVIEW_HASH = "page_preview_hash";
 
-	public String generateToken(String pageCode);
+	public String encrypt(String pageCode);
+
+	public  String decrypt(String encryptKey);
+
 }

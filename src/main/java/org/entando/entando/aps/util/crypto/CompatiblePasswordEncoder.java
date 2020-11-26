@@ -48,7 +48,7 @@ public class CompatiblePasswordEncoder implements PasswordEncoder {
         } else if (isArgon2(encodedPassword)) {
             return argon2Encoder.matches(password, encodedPassword);
         } else {
-            throw new EntRuntimeException("Legacy password encryption is more supported");
+            throw new EntRuntimeException("Legacy password encryption is no more supported");
         }
     }
 

@@ -19,6 +19,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.entando.entando.web.activitystream.ActivityStreamControllerIntegrationTest;
 import org.entando.entando.web.activitystream.StreamInterceptorIntegrationTest;
+import org.entando.entando.web.analysis.AnalysisControllerTest;
 import org.entando.entando.web.api.oauth2.ApiConsumerControllerIntegrationTest;
 import org.entando.entando.web.api.oauth2.ApiConsumerControllerTest;
 import org.entando.entando.web.category.CategoryControllerIntegrationTest;
@@ -44,6 +45,7 @@ import org.entando.entando.web.label.LabelControllerIntegrationTest;
 import org.entando.entando.web.label.LabelControllerUnitTest;
 import org.entando.entando.web.language.LanguageControllerIntegrationTest;
 import org.entando.entando.web.language.LanguageControllerUnitTest;
+import org.entando.entando.web.page.PageConfigurationControllerIntegrationTest;
 import org.entando.entando.web.page.PageControllerIntegrationTest;
 import org.entando.entando.web.page.PageControllerTest;
 import org.entando.entando.web.pagemodel.PageModelControllerIntegrationTest;
@@ -56,6 +58,7 @@ import org.entando.entando.web.system.ReloadConfigurationControllerTest;
 import org.entando.entando.web.user.UserControllerDeleteAuthoritiesIntegrationTest;
 import org.entando.entando.web.user.UserControllerIntegrationTest;
 import org.entando.entando.web.user.UserControllerUnitTest;
+import org.entando.entando.web.userpreferences.UserPreferencesControllerIntegrationTest;
 import org.entando.entando.web.userprofile.ProfileTypeControllerIntegrationTest;
 import org.entando.entando.web.userprofile.ProfileTypeControllerTest;
 import org.entando.entando.web.userprofile.UserProfileControllerIntegrationTest;
@@ -70,6 +73,8 @@ public class ControllersAllTests extends TestCase {
     public static Test suite() {
         TestSuite suite = new TestSuite(ControllersAllTests.class.getName());
         
+        suite.addTest(new JUnit4TestAdapter(AnalysisControllerTest.class));
+
         suite.addTest(new JUnit4TestAdapter(GroupControllerUnitTest.class));
         suite.addTest(new JUnit4TestAdapter(GroupControllerIntegrationTest.class));
 
@@ -137,7 +142,11 @@ public class ControllersAllTests extends TestCase {
 
         suite.addTest(new JUnit4TestAdapter(ApiConsumerControllerIntegrationTest.class));
         suite.addTest(new JUnit4TestAdapter(ApiConsumerControllerTest.class));
-        
+
+        suite.addTest(new JUnit4TestAdapter(PageConfigurationControllerIntegrationTest.class));
+
+        suite.addTest(new JUnit4TestAdapter(UserPreferencesControllerIntegrationTest.class));
+
         return suite;
     }
 

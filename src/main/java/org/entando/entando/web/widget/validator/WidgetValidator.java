@@ -13,10 +13,15 @@
  */
 package org.entando.entando.web.widget.validator;
 
+import com.agiletec.aps.util.ApsProperties;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.entando.entando.aps.system.exception.ResourceNotFoundException;
+import org.entando.entando.aps.system.services.widgettype.WidgetType;
+import org.entando.entando.aps.system.services.widgettype.WidgetTypeManager;
 import org.entando.entando.web.common.validator.AbstractPaginationValidator;
 import org.entando.entando.web.widget.model.WidgetRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 
@@ -38,6 +43,9 @@ public class WidgetValidator extends AbstractPaginationValidator {
 
     public static final String ERRCODE_NOT_BLANK = "52";
 
+    @Autowired
+    private WidgetTypeManager widgetTypeManager;
+
     @Override
     public boolean supports(Class<?> paramClass) {
         return WidgetRequest.class.equals(paramClass);
@@ -56,9 +64,31 @@ public class WidgetValidator extends AbstractPaginationValidator {
         if (!StringUtils.equals(widgetCode, widgetRequest.getCode())) {
             errors.rejectValue("code", ERRCODE_URINAME_MISMATCH, new String[]{widgetCode, widgetRequest.getCode()}, "widgettype.code.mismatch");
         }
+
+        WidgetType type = widgetTypeManager.getWidgetType(widgetCode);
+
+        if (type == null) {
+            throw new ResourceNotFoundException(WidgetValidator.ERRCODE_WIDGET_DOES_NOT_EXISTS, "widget", widgetCode);
+        }
+
+        ApsProperties newWidgetConfig = ApsProperties.fromMap(widgetRequest.getConfig());
+        ApsProperties widgetTypeConfig = type.getConfig();
+
+        if (newWidgetConfig.size( ) == 0) {
+            newWidgetConfig = null;
+        }
+
+        if ((widgetTypeConfig==null && newWidgetConfig!=null && type.isLocked()) ||
+           (widgetTypeConfig!=null && newWidgetConfig==null && type.isLocked()) ||
+           (widgetTypeConfig!=null && newWidgetConfig!=null  && !widgetTypeConfig.equals(newWidgetConfig) && type.isLocked()))
+        {
+            errors.rejectValue("code", ERRCODE_OPERATION_FORBIDDEN_LOCKED, new String[]{widgetCode, widgetRequest.getCode()}, "widgettype.edit.locked");
+        }
+
         this.validateTitles(widgetRequest, errors);
+
     }
-    
+
     protected void validateTitles(WidgetRequest widgetRequest, Errors errors) {
         Map<String, String> titles = widgetRequest.getTitles();
         if (null == titles) {

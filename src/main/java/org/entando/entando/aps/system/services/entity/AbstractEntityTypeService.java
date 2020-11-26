@@ -137,6 +137,10 @@ public abstract class AbstractEntityTypeService<I extends IApsEntity, O extends 
     }
 
     protected AttributeTypeDto getAttributeType(String entityManagerCode, String attributeCode) {
+        return this.getAttributeType(entityManagerCode, null, attributeCode);
+    }
+
+    protected AttributeTypeDto getAttributeType(String entityManagerCode, String entityTypeCode, String attributeCode) {
         IEntityManager entityManager = this.extractEntityManager(entityManagerCode);
         AttributeInterface attribute = entityManager.getEntityAttributePrototypes().get(attributeCode);
         if (null == attribute) {
@@ -148,6 +152,17 @@ public abstract class AbstractEntityTypeService<I extends IApsEntity, O extends 
             dto.setEnumeratorMapExtractorBeans(this.getEnumeratorMapExtractorBeans());
         } else if (dto.isEnumeratorOptionsSupported()) {
             dto.setEnumeratorExtractorBeans(this.getEnumeratorExtractorBeans());
+        }
+        if (null != entityTypeCode) {
+            I entityType = (I) entityManager.getEntityPrototype(entityTypeCode);
+            if (null == entityType) {
+                logger.warn(NO_TYPE_FOUND_WITH_CODE, entityTypeCode);
+                throw new ResourceNotFoundException(ERRCODE_ENTITY_TYPE_DOES_NOT_EXIST, TYPE_CODE, entityTypeCode);
+            }
+            dto.setAssignedRoles(new HashMap<>());
+            entityType.getAttributeList().stream().filter(a -> (null != a.getRoles())).forEach(a -> 
+                Arrays.asList(a.getRoles()).stream().forEach(r -> dto.getAssignedRoles().put(r, a.getName()))
+            );
         }
         return dto;
     }
@@ -383,6 +398,15 @@ public abstract class AbstractEntityTypeService<I extends IApsEntity, O extends 
     }
 
     protected IEntityManager extractEntityManager(String entityManagerCode) {
+        IEntityManager entityManager = loadEntityManager(entityManagerCode);
+        if (null == entityManager) {
+            logger.warn("no entity manager found with code {}", entityManagerCode);
+            throw new ResourceNotFoundException("entityManagerCode", entityManagerCode);
+        }
+        return entityManager;
+    }
+
+    protected IEntityManager loadEntityManager(String entityManagerCode) {
         IEntityManager entityManager = null;
         List<IEntityManager> managers = this.getEntityManagers();
         for (IEntityManager manager : managers) {
@@ -390,10 +414,6 @@ public abstract class AbstractEntityTypeService<I extends IApsEntity, O extends 
                 entityManager = manager;
                 break;
             }
-        }
-        if (null == entityManager) {
-            logger.warn("no entity manager found with code {}", entityManagerCode);
-            throw new ResourceNotFoundException("entityManagerCode", entityManagerCode);
         }
         return entityManager;
     }

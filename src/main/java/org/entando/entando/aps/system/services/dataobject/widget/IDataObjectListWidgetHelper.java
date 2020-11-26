@@ -112,8 +112,8 @@ public interface IDataObjectListWidgetHelper extends org.entando.entando.aps.sys
 			= {IDataObjectManager.ENTITY_TYPE_CODE_FILTER_KEY, IDataObjectManager.DATA_OBJECT_DESCR_FILTER_KEY, IDataObjectManager.DATA_OBJECT_STATUS_FILTER_KEY,
 				IDataObjectManager.DATA_OBJECT_CREATION_DATE_FILTER_KEY, IDataObjectManager.DATA_OBJECT_MODIFY_DATE_FILTER_KEY, IDataObjectManager.DATA_OBJECT_ONLINE_FILTER_KEY};
 
-	/*public static final String[] allowedMetadataUserFilterOptionKeys
-			= {UserFilterOptionBean.KEY_CATEGORY, UserFilterOptionBean.KEY_FULLTEXT};*/
+	public static final String[] allowedMetadataUserFilterOptionKeys
+			= {UserFilterOptionBean.KEY_CATEGORY, UserFilterOptionBean.KEY_FULLTEXT};
 
 	public static final String WIDGET_PARAM_CONTENT_TYPE = "contentType";
 	public static final String WIDGET_PARAM_USER_FILTERS = "userFilters";

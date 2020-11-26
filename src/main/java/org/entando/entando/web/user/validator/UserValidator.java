@@ -13,6 +13,8 @@
  */
 package org.entando.entando.web.user.validator;
 
+import org.entando.entando.aps.system.services.userprofile.IUserProfileManager;
+import org.entando.entando.aps.system.services.userprofile.model.IUserProfile;
 import org.entando.entando.ent.exception.EntException;
 import com.agiletec.aps.system.services.group.IGroupManager;
 import com.agiletec.aps.system.services.role.IRoleManager;
@@ -31,6 +33,7 @@ import org.entando.entando.web.common.RestErrorCodes;
 import org.entando.entando.web.common.exceptions.ResourcePermissionsException;
 import org.entando.entando.web.common.exceptions.ValidationConflictException;
 import org.entando.entando.web.common.validator.AbstractPaginationValidator;
+import org.entando.entando.web.entity.validator.AbstractEntityTypeValidator;
 import org.entando.entando.web.user.model.UserAuthoritiesRequest;
 import org.entando.entando.web.user.model.UserPasswordRequest;
 import org.entando.entando.web.user.model.UserRequest;
@@ -48,7 +51,8 @@ public class UserValidator extends AbstractPaginationValidator {
 
     private final org.slf4j.Logger logger = EntLogFactory.getSanitizedLogger(getClass());
 
-    private Pattern pattern = Pattern.compile("([a-zA-Z0-9_\\.])+");
+    private Pattern patternUsername = Pattern.compile("([a-z0-9_\\.])+");
+    private Pattern patternPassword = Pattern.compile("([a-zA-Z0-9_\\.])+");
 
     public static final String ERRCODE_USER_ALREADY_EXISTS = "1";
 
@@ -70,6 +74,8 @@ public class UserValidator extends AbstractPaginationValidator {
 
     public static final String ERRCODE_SELF_DELETE = "8";
 
+    public static final String ERRCODE_UPDATE_OTHER = "9";
+
     @Autowired
     @Qualifier("compatiblePasswordEncoder")
     private PasswordEncoder passwordEncoder;
@@ -82,6 +88,9 @@ public class UserValidator extends AbstractPaginationValidator {
 
     @Autowired
     IRoleManager roleManager;
+
+    @Autowired
+    IUserProfileManager userProfileManager;
 
     public IUserManager getUserManager() {
         return userManager;
@@ -135,12 +144,19 @@ public class UserValidator extends AbstractPaginationValidator {
             bindingResult.reject(UserValidator.ERRCODE_USER_ALREADY_EXISTS, new String[]{username}, "user.exists");
             throw new ValidationConflictException(bindingResult);
         }
-        Matcher matcherUsername = pattern.matcher(username);
+        Matcher matcherUsername = patternUsername.matcher(username);
         int usLength = username.length();
         if (usLength < 4 || usLength > 80 || !matcherUsername.matches()) {
             bindingResult.reject(UserValidator.ERRCODE_USERNAME_FORMAT_INVALID, new String[]{username}, "user.username.format.invalid");
         }
         this.checkNewPassword(username, request.getPassword(), bindingResult);
+        String profileTypeCode = request.getProfileType();
+        if (null != profileTypeCode) {
+            IUserProfile userProfile = userProfileManager.getProfileType(profileTypeCode);
+            if (null == userProfile) {
+                throw new ResourceNotFoundException(AbstractEntityTypeValidator.ERRCODE_ENTITY_TYPE_DOES_NOT_EXIST, "Profile Type", profileTypeCode);
+            }
+        }
     }
 
     public static boolean isAdminUser(String username) {
@@ -185,6 +201,13 @@ public class UserValidator extends AbstractPaginationValidator {
         }
     }
 
+    public void validateSameUser(String username, String currentUser, BindingResult bindingResult) {
+        if (!username.equals(currentUser)) {
+            bindingResult.reject(ERRCODE_UPDATE_OTHER, new String[]{username}, "user.preferences.update.other");
+            throw new ResourcePermissionsException(bindingResult);
+        }
+    }
+
     public void validatePutBody(String username, UserRequest userRequest, BindingResult bindingResult) {
         if (!StringUtils.equals(username, userRequest.getUsername())) {
             bindingResult.rejectValue("username", ERRCODE_USERNAME_MISMATCH, new String[]{username, userRequest.getUsername()}, "user.username.mismatch");
@@ -222,7 +245,7 @@ public class UserValidator extends AbstractPaginationValidator {
             return;
         }
         int pwLength = password.length();
-        Matcher matcherPassword = pattern.matcher(password);
+        Matcher matcherPassword = patternPassword.matcher(password);
         if (pwLength < 8 || pwLength > 20 || !matcherPassword.matches()) {
             bindingResult.reject(UserValidator.ERRCODE_PASSWORD_FORMAT_INVALID, new String[]{username}, "user.password.format.invalid");
         }

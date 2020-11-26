@@ -13,10 +13,10 @@
  */
 package org.entando.entando.web.widget.model;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
+
+import java.util.Map;
 
 public class WidgetRequest {
 
@@ -39,6 +39,10 @@ public class WidgetRequest {
     private String parentType;
 
     private Map<String, String> config;
+
+    private Boolean readonlyPageWidgetConfig;
+
+    private String widgetCategory;
 
     public String getCode() {
         return code;
@@ -102,5 +106,21 @@ public class WidgetRequest {
 
     public void setConfig(Map<String, String> config) {
         this.config = config;
+    }
+
+    public Boolean isReadonlyPageWidgetConfig() {
+        return readonlyPageWidgetConfig;
+    }
+
+    public void setReadonlyPageWidgetConfig(Boolean readonlyPageWidgetConfig) {
+        this.readonlyPageWidgetConfig = readonlyPageWidgetConfig;
+    }
+
+    public String getWidgetCategory() {
+        return widgetCategory;
+    }
+
+    public void setWidgetCategory(String widgetCategory) {
+        this.widgetCategory = widgetCategory;
     }
 }

@@ -259,11 +259,12 @@ public class WidgetServiceTest {
         ArgumentCaptor<String> configUiCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> bundleIdCaptor = ArgumentCaptor.forClass(String.class);
         verify(widgetManager).updateWidgetType(anyString(), any(), any(), anyString(), configUiCaptor.capture(),
-                bundleIdCaptor.capture());
+                bundleIdCaptor.capture(), anyBoolean(), anyString());
         assertThat(configUiCaptor.getValue()).isEqualTo(objectMapper.writeValueAsString(widgetRequest.getConfigUi()));
         assertThat(bundleIdCaptor.getValue()).isEqualTo(widgetRequest.getBundleId());
         assertThat(widgetDto.getConfigUi()).isEqualTo(widgetRequest.getConfigUi());
         assertThat(widgetDto.getBundleId()).isEqualTo(widgetRequest.getBundleId());
+        assertThat(widgetDto.getWidgetCategory()).isEqualTo(widgetRequest.getWidgetCategory());
     }
 
     private WidgetType getWidget1() throws JsonProcessingException {
@@ -272,6 +273,7 @@ public class WidgetServiceTest {
         widgetType.setMainGroup("group1");
         widgetType.setLocked(true);
         widgetType.setBundleId(BUNDLE_1);
+        widgetType.setReadonlyPageWidgetConfig(true);
         widgetType.setConfigUi(objectMapper.writeValueAsString(
                 ImmutableMap.of(CUSTOM_ELEMENT_KEY, CUSTOM_ELEMENT_1, RESOURCES_KEY, RESOURCES_1)));
         return widgetType;
@@ -283,6 +285,7 @@ public class WidgetServiceTest {
         widgetType.setMainGroup("group2");
         widgetType.setParentType(getWidget1());
         widgetType.setBundleId(BUNDLE_2);
+        widgetType.setReadonlyPageWidgetConfig(true);
         widgetType.setConfigUi(objectMapper.writeValueAsString(
                 ImmutableMap.of(CUSTOM_ELEMENT_KEY, CUSTOM_ELEMENT_2, RESOURCES_KEY, RESOURCES_2)));
         return widgetType;
@@ -294,8 +297,10 @@ public class WidgetServiceTest {
         widgetRequest.setTitles(ImmutableMap.of("it", "Mio Titolo", "en", "My Title"));
         widgetRequest.setCustomUi("<div></div>");
         widgetRequest.setGroup("group");
+        widgetRequest.setReadonlyPageWidgetConfig(true);
         widgetRequest.setConfigUi(ImmutableMap.of(CUSTOM_ELEMENT_KEY, CUSTOM_ELEMENT_1, RESOURCES_KEY, RESOURCES_1));
         widgetRequest.setBundleId(BUNDLE_1);
+        widgetRequest.setWidgetCategory("test");
         return widgetRequest;
     }
 

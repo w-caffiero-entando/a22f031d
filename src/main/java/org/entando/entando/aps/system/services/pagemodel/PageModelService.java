@@ -33,6 +33,7 @@ import org.entando.entando.web.pagemodel.validator.PageModelValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 
 import java.util.*;
@@ -104,6 +105,11 @@ public class PageModelService implements IPageModelService, ApplicationContextAw
         PageModelDto dto = this.dtoBuilder.convert(pageModel);
         dto.setReferences(this.getReferencesInfo(pageModel));
         return dto;
+    }
+
+    @Override
+    public boolean exists(String code) {
+        return this.pageModelManager.getPageModel(code) != null;
     }
 
     @Override
@@ -215,6 +221,14 @@ public class PageModelService implements IPageModelService, ApplicationContextAw
         descPageModel.setTemplate(srcPpageModelRequest.getTemplate());
         descPageModel.setPluginCode(srcPpageModelRequest.getPluginCode());
         descPageModel.setConfiguration(this.createPageModelConfiguration(srcPpageModelRequest));
+
+        if (null != srcPpageModelRequest.getConfiguration()
+                && ! CollectionUtils.isEmpty(srcPpageModelRequest.getConfiguration().getFrames())
+                && null != srcPpageModelRequest.getConfiguration().getFrames().get(0)
+                && srcPpageModelRequest.getConfiguration().getFrames().get(0).isMainFrame()) {
+
+            descPageModel.setMainFrame(0);
+        }
     }
 
     protected Frame[] createPageModelConfiguration(PageModelRequest pageModelRequest) {

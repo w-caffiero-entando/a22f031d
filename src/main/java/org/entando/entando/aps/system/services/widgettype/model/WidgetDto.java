@@ -14,11 +14,12 @@
 package org.entando.entando.aps.system.services.widgettype.model;
 
 import com.agiletec.aps.util.ApsProperties;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
 
 public class WidgetDto {
 
@@ -41,6 +42,9 @@ public class WidgetDto {
     private ApsProperties config;
     private String parentType;
     private String action;
+    private Boolean readonlyPageWidgetConfig;
+    private boolean locked;
+    private String widgetCategory;
 
     protected class GuiFragmentRef {
 
@@ -237,5 +241,29 @@ public class WidgetDto {
 
     public void setConfig(ApsProperties config) {
         this.config = config;
+    }
+
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public void setLocked(boolean locked) {
+        this.locked = locked;
+    }
+
+   public Boolean isReadonlyPageWidgetConfig() {
+        return readonlyPageWidgetConfig;
+    }
+
+    public void setReadonlyPageWidgetConfig(Boolean readonlyPageWidgetConfig) {
+        this.readonlyPageWidgetConfig = readonlyPageWidgetConfig;
+    }
+
+    public String getWidgetCategory() {
+        return widgetCategory;
+    }
+
+    public void setWidgetCategory(String widgetCategory) {
+        this.widgetCategory = widgetCategory;
     }
 }

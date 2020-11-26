@@ -13,16 +13,16 @@
  */
 package org.entando.entando.aps.system.services.widgettype;
 
+import com.agiletec.aps.util.ApsProperties;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+
+import javax.servlet.ServletContext;
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.agiletec.aps.util.ApsProperties;
-import java.io.File;
-import java.io.IOException;
-import javax.servlet.ServletContext;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 /**
  * Rappresenta un tipo di oggetto visuale che può essere inserito in una pagina,
@@ -71,6 +71,18 @@ public class WidgetType implements Serializable {
 
     private String bundleId;
 
+
+    /**
+     * The readonlyPageWidgetConfig boolean field is read during the widget configuration, if It's false the user
+     * can override the widget type default configuration in the instance of the widget
+     */
+    private boolean readonlyPageWidgetConfig;
+
+    /**
+     * The widgetCategory string field is used to group widget types
+     */
+    private String widgetCategory;
+
     public final static String WIDGET_LOCATION = "aps/jsp/widgets/";
 
     @Override
@@ -96,6 +108,13 @@ public class WidgetType implements Serializable {
             clone.setTypeParameters(params);
         }
         clone.setMainGroup(this.getMainGroup());
+        if (this.isReadonlyPageWidgetConfig()){
+            clone.setReadonlyPageWidgetConfig(this.readonlyPageWidgetConfig);
+        }
+        else {
+            clone.setReadonlyPageWidgetConfig(false);
+        }
+        clone.setWidgetCategory(this.widgetCategory);
         return clone;
     }
 
@@ -269,6 +288,22 @@ public class WidgetType implements Serializable {
         this._locked = locked;
     }
 
+    public boolean isReadonlyPageWidgetConfig() {
+        return readonlyPageWidgetConfig;
+    }
+
+    public void setReadonlyPageWidgetConfig(boolean readonlyPageWidgetConfig) {
+        this.readonlyPageWidgetConfig = readonlyPageWidgetConfig;
+    }
+
+    public String getWidgetCategory() {
+        return widgetCategory;
+    }
+
+    public void setWidgetCategory(String widgetCategory) {
+        this.widgetCategory = widgetCategory;
+    }
+
     public String getMainGroup() {
         return _mainGroup;
     }
@@ -340,6 +375,8 @@ public class WidgetType implements Serializable {
         result = prime * result + ((_parentTypeCode == null) ? 0 : _parentTypeCode.hashCode());
         result = prime * result + ((_pluginCode == null) ? 0 : _pluginCode.hashCode());
         result = prime * result + ((_titles == null) ? 0 : _titles.hashCode());
+        result = prime * result + (readonlyPageWidgetConfig ? 1231 : 1237);
+        result = prime * result + ((widgetCategory == null) ? 0 : widgetCategory.hashCode());
         return result;
     }
 
@@ -421,6 +458,17 @@ public class WidgetType implements Serializable {
         } else if (!_titles.equals(other._titles)) {
             return false;
         }
+        if (readonlyPageWidgetConfig != other.readonlyPageWidgetConfig) {
+            return false;
+        }
+        if (widgetCategory == null) {
+            if (other.widgetCategory != null) {
+                return false;
+            }
+        } else if (!widgetCategory.equals(other.widgetCategory)) {
+            return false;
+        }
         return true;
     }
+
 }

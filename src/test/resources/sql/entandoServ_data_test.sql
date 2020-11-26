@@ -53,18 +53,14 @@ INSERT INTO authusergrouprole (username, groupname, rolename) VALUES ('pageManag
 INSERT INTO authusergrouprole (username, groupname, rolename) VALUES ('admin', 'administrators', 'admin');
 
 
-
-
-INSERT INTO authusers (username, passwd, registrationdate, lastaccess, lastpasswordchange, active) VALUES ('supervisorCoach', 'supervisorCoach', '2008-09-25 00:00:00', '2009-01-30 00:00:00', NULL, 1);
-INSERT INTO authusers (username, passwd, registrationdate, lastaccess, lastpasswordchange, active) VALUES ('mainEditor', 'mainEditor', '2008-09-25 00:00:00', '2009-01-30 00:00:00', NULL, 1);
-INSERT INTO authusers (username, passwd, registrationdate, lastaccess, lastpasswordchange, active) VALUES ('pageManagerCoach', 'pageManagerCoach', '2008-09-25 00:00:00', '2009-01-30 00:00:00', NULL, 1);
-INSERT INTO authusers (username, passwd, registrationdate, lastaccess, lastpasswordchange, active) VALUES ('supervisorCustomers', 'supervisorCustomers', '2008-09-25 00:00:00', '2009-01-30 00:00:00', NULL, 1);
-INSERT INTO authusers (username, passwd, registrationdate, lastaccess, lastpasswordchange, active) VALUES ('pageManagerCustomers', 'pageManagerCustomers', '2008-09-25 00:00:00', '2009-01-30 00:00:00', NULL, 1);
-INSERT INTO authusers (username, passwd, registrationdate, lastaccess, lastpasswordchange, active) VALUES ('editorCustomers', 'editorCustomers', '2008-09-25 00:00:00', '2009-07-02 00:00:00', NULL, 1);
-INSERT INTO authusers (username, passwd, registrationdate, lastaccess, lastpasswordchange, active) VALUES ('editorCoach', 'editorCoach', '2008-09-25 00:00:00', '2009-07-02 00:00:00', NULL, 1);
-INSERT INTO authusers (username, passwd, registrationdate, lastaccess, lastpasswordchange, active) VALUES ('admin', 'admin', '2008-09-25 00:00:00', '2009-12-16 00:00:00', NULL, 1);
-
-
+INSERT INTO authusers (username, passwd, registrationdate, lastaccess, lastpasswordchange, active) VALUES ('supervisorCoach', '{bcrypt}$2a$10$zy1zkH5mP09rGv.iSYQiPunsc7F9Rd/TpZXm03YtSfZVeHK9Nddw2', '2008-09-25 00:00:00', '2009-01-30 00:00:00', NULL, 1);
+INSERT INTO authusers (username, passwd, registrationdate, lastaccess, lastpasswordchange, active) VALUES ('mainEditor', '{bcrypt}$2a$10$WUtgtTwdhJdD0hTBu0aIlOgjdgv5wZ7W1BD9Nh.woEzmEfq3m1CT.', '2008-09-25 00:00:00', '2009-01-30 00:00:00', NULL, 1);
+INSERT INTO authusers (username, passwd, registrationdate, lastaccess, lastpasswordchange, active) VALUES ('pageManagerCoach', '{bcrypt}$2a$10$NIhSwtsre0H9tVDVpcs86eN/vR816tJxEPJwbtU4XeJOoFfvOYX6m', '2008-09-25 00:00:00', '2009-01-30 00:00:00', NULL, 1);
+INSERT INTO authusers (username, passwd, registrationdate, lastaccess, lastpasswordchange, active) VALUES ('supervisorCustomers', '{bcrypt}$2a$10$pAmySl8JN1jYKRO9A88sEeesmrWiTOPndbgvifWjKW0BMD7zFk0JK', '2008-09-25 00:00:00', '2009-01-30 00:00:00', NULL, 1);
+INSERT INTO authusers (username, passwd, registrationdate, lastaccess, lastpasswordchange, active) VALUES ('pageManagerCustomers', '{bcrypt}$2a$10$eAFQsWoQG9k9.D6mo0aQJu/aAXGJE/dwuOBj8sbXPL7CH3YiWRVyG', '2008-09-25 00:00:00', '2009-01-30 00:00:00', NULL, 1);
+INSERT INTO authusers (username, passwd, registrationdate, lastaccess, lastpasswordchange, active) VALUES ('editorCustomers', '{bcrypt}$2a$10$6mbu1yVQ/jdgPnuqFMvbYOQklHY6VmIBUZTeYaY3OhxiGx0Yjbx3K', '2008-09-25 00:00:00', '2009-07-02 00:00:00', NULL, 1);
+INSERT INTO authusers (username, passwd, registrationdate, lastaccess, lastpasswordchange, active) VALUES ('editorCoach', '{bcrypt}$2a$10$8KYc6sUA7fiC2Pia20J4ouMk3Meb.zW3qk0QBD8EZ0vQiI0jqysMa', '2008-09-25 00:00:00', '2009-07-02 00:00:00', NULL, 1);
+INSERT INTO authusers (username, passwd, registrationdate, lastaccess, lastpasswordchange, active) VALUES ('admin', '{bcrypt}$2a$10$E9R2sHNZ/YXlDn188lpdyeoBl2iSF4E5LE8FNvxbdZbqnqlNP2mL2', '2008-09-25 00:00:00', '2009-12-16 00:00:00', NULL, 1);
 
 
 INSERT INTO authuserprofiles (username, profiletype, profilexml, publicprofile) VALUES ('editorCustomers', 'PFL', '<?xml version="1.0" encoding="UTF-8"?>
@@ -111,6 +107,43 @@ INSERT INTO authuserprofiles (username, profiletype, profilexml, publicprofile) 
 		<attribute name="boolean2" attributetype="Boolean"><boolean>false</boolean></attribute>
 	</attributes>
 </profile>', 0);
+INSERT INTO authuserprofiles (username, profiletype, profilexml, publicprofile) VALUES ('supervisorCoach', 'ALL', '<?xml version="1.0" encoding="UTF-8"?>
+<profile id="supervisorCoach" typecode="ALL" typedescr="Content type with all attribute types"><descr /><groups /><categories />
+<attributes>
+<attribute name="Boolean" attributetype="Boolean"><boolean>true</boolean></attribute>
+<attribute name="CheckBox" attributetype="CheckBox" />
+<attribute name="Date" attributetype="Date"><date>20100321</date></attribute>
+<attribute name="Date2" attributetype="Date"><date>20120321</date></attribute>
+<attribute name="Enumerator" attributetype="Enumerator"><monotext>a</monotext></attribute>
+<attribute name="EnumeratorMap" attributetype="EnumeratorMap"><key>02</key><value>Value 2 Old</value></attribute>
+<attribute name="Hypertext" attributetype="Hypertext"><hypertext lang="it"><![CDATA[<p>text Hypertext</p>]]></hypertext></attribute>
+<attribute name="Longtext" attributetype="Longtext"><text lang="it">text Longtext</text></attribute>
+<attribute name="Email" attributetype="Email"><monotext>test.test@entando.com</monotext></attribute>
+<attribute name="Monotext" attributetype="Monotext"><monotext>text Monotext</monotext></attribute>
+<attribute name="Mail" attributetype="Mail"><monotext>test.test@entando.com</monotext></attribute>
+<attribute name="Monotext2" attributetype="Monotext"><monotext>aaaa@entando.com</monotext></attribute>
+<attribute name="Number" attributetype="Number"><number>25</number></attribute>
+<attribute name="Number2" attributetype="Number"><number>85</number></attribute>
+<attribute name="Text" attributetype="Text"><text lang="it">text Text</text></attribute>
+<attribute name="Text2" attributetype="Text"><text lang="it">bbbb@entando.com</text></attribute>
+<attribute name="ThreeState" attributetype="ThreeState"><boolean>false</boolean></attribute>
+<attribute name="Timestamp" attributetype="Timestamp"><timestamp>2020-09-25 17:46:20:123</timestamp></attribute>
+<composite name="Composite" attributetype="Composite">
+<attribute name="Boolean" attributetype="Boolean"><boolean>true</boolean></attribute>
+<attribute name="CheckBox" attributetype="CheckBox" />
+<attribute name="Date" attributetype="Date"><date>20100328</date></attribute>
+<attribute name="Timestamp" attributetype="Timestamp"><date>20100328</date></attribute>
+<attribute name="Enumerator" attributetype="Enumerator" />
+<attribute name="Hypertext" attributetype="Hypertext"><hypertext lang="it"><![CDATA[text Hypertext of Composite]]></hypertext></attribute>
+<attribute name="Longtext" attributetype="Longtext"><text lang="it">text Longtext of Composite</text></attribute>
+<attribute name="Monotext" attributetype="Monotext"><monotext>text Monotext of Composite</monotext></attribute>
+<attribute name="Number" attributetype="Number"><number>89</number></attribute>
+<attribute name="Text" attributetype="Text"><text lang="it">text Text of Composite</text></attribute>
+<attribute name="ThreeState" attributetype="ThreeState"><boolean>true</boolean></attribute>
+<attribute name="Timestamp" attributetype="Timestamp"><timestamp>1972-09-25 17:46:20:123</timestamp></attribute>
+</composite><attribute name="MARKER" attributetype="Monotext"><monotext>MARKER</monotext></attribute>
+</attributes></profile>', 0);
+
 
 INSERT INTO authuserprofilesearch (username, attrname, textvalue, datevalue, numvalue, langcode) VALUES ('editorCoach', 'fullname', 'Rick Bobonsky', NULL, NULL, NULL);
 INSERT INTO authuserprofilesearch (username, attrname, textvalue, datevalue, numvalue, langcode) VALUES ('editorCoach', 'email', 'rick.bobonsky@mailinator.com', NULL, NULL, NULL);

@@ -389,17 +389,17 @@ INSERT INTO pages_metadata_draft (code, groupcode, titles, modelcode, showinmenu
 </config>', '2017-02-17 13:06:24');
 
 
-INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup) VALUES ('login_form', '<?xml version="1.0" encoding="UTF-8"?>
+INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup, readonlypagewidgetconfig, widgetcategory) VALUES ('login_form', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="en">Login Widget</property>
 <property key="it">Widget di Login</property>
-</properties>', NULL, NULL, NULL, NULL, 1, NULL);
-INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup) VALUES ('messages_system', '<?xml version="1.0" encoding="UTF-8"?>
+</properties>', NULL, NULL, NULL, NULL, 1, NULL, 1, 'system');
+INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup, readonlypagewidgetconfig, widgetcategory) VALUES ('messages_system', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="en">System Messages</property>
 <property key="it">Messaggi di Sistema</property>
-</properties>', NULL, NULL, NULL, NULL, 1, NULL);
-INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup) VALUES ('formAction', '<?xml version="1.0" encoding="UTF-8"?>
+</properties>', NULL, NULL, NULL, NULL, 1, NULL, 1, 'system');
+INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup, readonlypagewidgetconfig, widgetcategory) VALUES ('formAction', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="en">Internal Servlet</property>
 <property key="it">Invocazione di una Servlet Interna</property>
@@ -408,16 +408,16 @@ INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode,
 		Path relativo di una action o una Jsp
 	</parameter>
 	<action name="configSimpleParameter"/>
-</config>', NULL, NULL, NULL, 1, NULL);
-INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup) VALUES ('leftmenu', '<?xml version="1.0" encoding="UTF-8"?>
+</config>', NULL, NULL, NULL, 1, NULL, 1, 'system');
+INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup, readonlypagewidgetconfig, widgetcategory) VALUES ('leftmenu', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="en">Vertical Navigation Menu</property>
 <property key="it">Menu di navigazione verticale</property>
 </properties>', '<config>
 	<parameter name="navSpec">Rules for the Page List auto-generation</parameter>
 	<action name="navigatorConfig" />
-</config>', NULL, NULL, NULL, 1, NULL);
-INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup) VALUES ('entando_apis', '<?xml version="1.0" encoding="UTF-8"?>
+</config>', NULL, NULL, NULL, 1, NULL, 1, 'navigation');
+INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup, readonlypagewidgetconfig, widgetcategory) VALUES ('entando_apis', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="en">APIs</property>
 <property key="it">APIs</property>
@@ -426,16 +426,16 @@ INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode,
 <properties>
 <property key="actionPath">/ExtStr2/do/Front/Api/Resource/list.action</property>
 </properties>
-', 1, 'free');
-INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup) VALUES ('logic_type', '<?xml version="1.0" encoding="UTF-8"?>
+', 1, 'free', 1, 'system');
+INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup, readonlypagewidgetconfig, widgetcategory) VALUES ('logic_type', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="en">Logic type for test</property>
 <property key="it">Tipo logico per test</property>
 </properties>', NULL, NULL, 'leftmenu', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="navSpec">code(homepage)</property>
-</properties>', 0, NULL);
-INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup) VALUES ('parent_widget', '<?xml version="1.0" encoding="UTF-8"?>
+</properties>', 0, NULL, 0, 'logic');
+INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup, readonlypagewidgetconfig, widgetcategory) VALUES ('parent_widget', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="en">Parent Widget</property>
 <property key="it">Parent Widget em Italiano</property>
@@ -444,7 +444,7 @@ INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode,
 		Description of the Widget Parameter
 	</parameter>
 	<action name="configSimpleParameter"/>
-</config>', NULL, NULL, NULL, 1, NULL);
+</config>', NULL, NULL, NULL, 1, NULL, 1, 'parentWidgetType');
 
 
 
@@ -616,7 +616,7 @@ INSERT INTO sysconfig (version, item, descr, config) VALUES ('test', 'params', '
 	</ExtendendPrivacyModule>
 </Params>');
 INSERT INTO sysconfig (version, item, descr, config) VALUES ('test', 'userProfileTypes', 'User Profile Types Definitions', '<profiletypes>
-	<profiletype typecode="PFL" typedescr="Default user profile" >
+	<profiletype typecode="PFL" typedescr="Default user profile type" >
 		<attributes>
 			<attribute name="fullname" attributetype="Monotext" searchable="true" >
 				<validations>
@@ -639,6 +639,145 @@ INSERT INTO sysconfig (version, item, descr, config) VALUES ('test', 'userProfil
 			<attribute name="language" attributetype="Monotext" required="true"/>
 			<attribute name="boolean1" attributetype="Boolean" searchable="true"/>
 			<attribute name="boolean2" attributetype="Boolean" searchable="true"/>
+		</attributes>
+	</profiletype>
+	<profiletype typecode="OTH" typedescr="Other user profile" >
+		<attributes>
+			<attribute name="firstname" attributetype="Monotext" searchable="true" >
+				<validations>
+					<required>true</required>
+				</validations>
+				<roles>
+					<role>userprofile:firstname</role>
+				</roles>
+			</attribute>
+			<attribute name="surname" attributetype="Monotext" searchable="true" >
+				<validations>
+					<required>true</required>
+				</validations>
+				<roles>
+					<role>userprofile:surname</role>
+				</roles>
+			</attribute>
+			<attribute name="email" attributetype="Email" searchable="true" >
+				<validations>
+					<required>true</required>
+				</validations>
+				<roles>
+					<role>userprofile:email</role>
+				</roles>
+			</attribute>
+		</attributes>
+	</profiletype>
+	<profiletype typecode="ALL" typedescr="Profile type with all attribute types">
+		<attributes>
+			<attribute name="Boolean" attributetype="Boolean" >
+				<validations><required>true</required></validations>
+			</attribute>
+			<attribute name="CheckBox" attributetype="CheckBox" >
+				<validations><required>true</required></validations>
+			</attribute>
+			<attribute name="Date" attributetype="Date" >
+				<validations><required>true</required></validations>
+			</attribute>
+			<attribute name="Date2" attributetype="Date">
+				<validations>
+					<rangestart attribute="Date" />
+					<rangeend>25/11/2026</rangeend>
+				</validations>
+			</attribute>
+			<attribute name="Enumerator" attributetype="Enumerator" separator=",">
+				<validations><required>true</required></validations>
+                                <![CDATA[a,b,c]]>
+                        </attribute>
+			<attribute name="EnumeratorMap" attributetype="EnumeratorMap" separator=";">
+                            <validations><required>true</required></validations>
+                            <![CDATA[01=Value 1;02=Value 2;03=Value 3]]>
+                        </attribute>
+			<attribute name="Hypertext" attributetype="Hypertext" >
+				<validations><required>true</required></validations>
+			</attribute>
+			<attribute name="Longtext" attributetype="Longtext" >
+				<validations><required>true</required></validations>
+			</attribute>
+			<attribute name="Email" attributetype="Email" >
+				<validations><required>true</required></validations>
+			</attribute>
+			<attribute name="Monotext" attributetype="Monotext" >
+				<validations><required>true</required></validations>
+			</attribute>
+			<attribute name="Monotext2" attributetype="Monotext">
+				<validations>
+                                        <required>true</required>
+					<minlength>15</minlength>
+					<maxlength>30</maxlength>
+					<regexp><![CDATA[.+@.+.[a-z]+]]></regexp>
+				</validations>
+			</attribute>
+			<attribute name="Number" attributetype="Number" >
+				<validations><required>true</required></validations>
+			</attribute>
+			<attribute name="Number2" attributetype="Number">
+				<validations>
+                                        <required>true</required>
+					<rangestart>50</rangestart>
+					<rangeend>300</rangeend>
+				</validations>
+			</attribute>
+			<attribute name="Text" attributetype="Text">
+                                <validations><required>true</required></validations>
+				<roles>
+					<role>jacms:title</role>
+				</roles>
+			</attribute>
+			<attribute name="Text2" attributetype="Text">
+				<validations>
+                                        <required>true</required>
+					<minlength>15</minlength>
+					<maxlength>30</maxlength>
+					<regexp><![CDATA[.+@.+.[a-z]+]]></regexp>
+				</validations>
+			</attribute>
+			<attribute name="ThreeState" attributetype="ThreeState" >
+				<validations><required>true</required></validations>
+			</attribute>
+			<attribute name="Timestamp" attributetype="Timestamp" >
+				<validations><required>true</required></validations>
+			</attribute>
+			<attribute name="Composite" attributetype="Composite">
+                                <validations><required>true</required></validations>
+				<attributes>
+					<attribute name="Boolean" attributetype="Boolean" />
+					<attribute name="CheckBox" attributetype="CheckBox" />
+					<attribute name="Date" attributetype="Date">
+						<validations>
+							<rangestart attribute="Date" />
+							<rangeend>10/10/2030</rangeend>
+						</validations>
+					</attribute>
+					<attribute name="Enumerator" attributetype="Enumerator" separator="," />
+					<attribute name="Hypertext" attributetype="Hypertext" />
+					<attribute name="Longtext" attributetype="Longtext" />
+					<attribute name="Monotext" attributetype="Monotext" />
+					<attribute name="Number" attributetype="Number">
+						<validations>
+							<expression evalOnValuedAttribute="true">
+								<ognlexpression><![CDATA[#entity.getAttribute(''Number'').value == null || (#entity.getAttribute(''Number'').value != null && value > #entity.getAttribute(''Number'').value)]]></ognlexpression>
+								<errormessage><![CDATA[Value has to be upper then ''Number'' attribute]]></errormessage>
+								<helpmessage><![CDATA[If ''Number'' valued attribute, Value has to be upper]]></helpmessage>
+							</expression>
+						</validations>
+					</attribute>
+					<attribute name="Text" attributetype="Text" />
+					<attribute name="ThreeState" attributetype="ThreeState" />
+					<attribute name="Timestamp" attributetype="Timestamp" />
+				</attributes>
+			</attribute>
+			<attribute name="MARKER" attributetype="Monotext">
+				<validations>
+					<required>true</required>
+				</validations>
+			</attribute>
 		</attributes>
 	</profiletype>
 </profiletypes>');

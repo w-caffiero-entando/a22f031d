@@ -13,15 +13,17 @@
  */
 package org.entando.entando.aps.system.services.storage;
 
-import org.entando.entando.ent.exception.EntException;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.CharEncoding;
+import org.entando.entando.ent.exception.EntException;
 import org.entando.entando.ent.exception.EntRuntimeException;
-import org.entando.entando.ent.util.EntLogging.EntLogger;
 import org.entando.entando.ent.util.EntLogging.EntLogFactory;
+import org.entando.entando.ent.util.EntLogging.EntLogger;
 
 import java.io.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Objects;
 
 public class LocalStorageManager implements IStorageManager {
 
@@ -79,43 +81,32 @@ public class LocalStorageManager implements IStorageManager {
 		return false;
 	}
 
+	@SuppressWarnings("ResultOfMethodCallIgnored")
 	@Override
 	public void createDirectory(String subPath, boolean isProtectedResource) {
-		ccc(subPath, isProtectedResource);
-	}
-
-	private void ccc(String subPath, boolean isProtectedResource) {
 		subPath = (null == subPath) ? "" : subPath;
 		String fullPath = this.createFullPath(subPath, isProtectedResource);
-		File dir = new File(fullPath);
-		if (!dir.exists() || !dir.isDirectory()) {
-			dir.mkdirs();
+		String diskRoot = (!isProtectedResource) ? this.getBaseDiskRoot() : this.getProtectedBaseDiskRoot();
+		try {
+			if (isSubPathOf(diskRoot, diskRoot)) {
+				File dir = new File(fullPath);
+				if (!dir.exists() || !dir.isDirectory()) {
+					dir.mkdirs();
+				}
+			} else {
+				throw new IOException("Path traversal detected");
+			}
+		} catch (IOException e) {
+			throw new EntRuntimeException("Error validating the path", e);
 		}
 	}
 
+	@Override
 	public void deleteDirectory(String subPath, boolean isProtectedResource) {
 		subPath = (null == subPath) ? "" : subPath;
 		String fullPath = this.createFullPath(subPath, isProtectedResource);
 		File dir = new File(fullPath);
 		this.delete(dir);
-	}
-
-	@Override
-	public void checkedDeleteDirectory(String subPath, boolean isProtectedResource, String baseDir) {
-		subPath = (null == subPath) ? "" : subPath;
-		String fullPath = this.createFullPath(subPath, isProtectedResource);
-		File dir = new File(fullPath);
-		try {
-			if (FileUtils.directoryContains(new File("/tmp/"), dir)) {
-				this.delete(dir);
-			} else {
-				throw new EntRuntimeException(
-						String.format("Path validation failed: \"%s\" not in \"%s\"", dir, baseDir)
-				);
-			}
-		} catch (IOException e) {
-			throw new EntRuntimeException("Error validating the path", e);
-		}
 	}
 
 	private boolean delete(File file) {
@@ -274,13 +265,14 @@ public class LocalStorageManager implements IStorageManager {
 		return newArray;
 	}
 
-	private String createFullPath(String subPath, boolean isProtectedResource) {
+	@Override
+	public String createFullPath(String subPath, boolean isProtectedResource) {
 		subPath = (null == subPath) ? "" : subPath;
 		String diskRoot = (!isProtectedResource) ? this.getBaseDiskRoot() : this.getProtectedBaseDiskRoot();
 		String resPath = this.createPath(diskRoot, subPath, false);
 		// PATH-TRAVERSAL-CHECK
 		try {
-			if (!FileUtils.directoryContains(new File(diskRoot), new File(resPath))) {
+			if (!diskRoot.endsWith(resPath) && !isSubPathOf(diskRoot, resPath)) {
 				throw new EntRuntimeException(
 						String.format("Path validation failed: \"%s\" not in \"%s\"", resPath, diskRoot)
 				);
@@ -401,5 +393,12 @@ public class LocalStorageManager implements IStorageManager {
 
 	public String getAllowedEditExtensions() {
 		return allowedEditExtensions;
+	}
+
+	public static boolean isSubPathOf(String basePath, String pathToCheck) throws IOException {
+		basePath = FilenameUtils.normalize(basePath);
+		if (!basePath.endsWith("/")) basePath = basePath.concat("/");
+		pathToCheck = FilenameUtils.normalize(pathToCheck);
+		return FilenameUtils.directoryContains(basePath, pathToCheck);
 	}
 }

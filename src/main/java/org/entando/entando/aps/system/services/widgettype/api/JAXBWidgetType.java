@@ -14,18 +14,6 @@
 package org.entando.entando.aps.system.services.widgettype.api;
 
 import com.agiletec.aps.util.ApsProperties;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ws.rs.core.Response;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-
 import org.entando.entando.aps.system.services.api.IApiErrorCodes;
 import org.entando.entando.aps.system.services.api.model.ApiException;
 import org.entando.entando.aps.system.services.guifragment.GuiFragment;
@@ -34,15 +22,24 @@ import org.entando.entando.aps.system.services.widgettype.IWidgetTypeManager;
 import org.entando.entando.aps.system.services.widgettype.WidgetType;
 import org.entando.entando.aps.system.services.widgettype.WidgetTypeParameter;
 
+import javax.ws.rs.core.Response;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author E.Santoboni
  */
 @XmlRootElement(name = "widgetType")
-@XmlType(propOrder = {"code", "titles", "pluginCode", "mainGroup", "typeParameters", "action", "parentTypeCode", "config", "locked", "gui", "fragments"})
+@XmlType(propOrder = {"code", "titles", "pluginCode", "mainGroup", "typeParameters", "action", "parentTypeCode", "config", "locked", "gui", "fragments", "readonlyPageWidgetConfig", "widgetCategory"})
 public class JAXBWidgetType implements Serializable {
-	
+
 	public JAXBWidgetType() {}
-	
+
 	public JAXBWidgetType(WidgetType widgetType, GuiFragment fragment, List<GuiFragment> fragments) {
 		this.setAction(widgetType.getAction());
 		this.setCode(widgetType.getCode());
@@ -55,7 +52,9 @@ public class JAXBWidgetType implements Serializable {
 		this.setPluginCode(widgetType.getPluginCode());
 		this.setTitles(widgetType.getTitles());
 		this.setTypeParameters(widgetType.getTypeParameters());
-		if (null != fragment) {
+        this.setReadonlyPageWidgetConfig(widgetType.isReadonlyPageWidgetConfig());
+        this.setWidgetCategory(widgetType.getWidgetCategory());
+        if (null != fragment) {
 			this.setGui(fragment.getCurrentGui());
 		}
 		if (null != fragments) {
@@ -73,7 +72,7 @@ public class JAXBWidgetType implements Serializable {
 			this.setFragments(jaxbFragments);
 		}
 	}
-	
+
 	public WidgetType getNewWidgetType(IWidgetTypeManager widgetTypeManager) {
 		WidgetType type = new WidgetType();
 		type.setCode(this.getCode());
@@ -93,10 +92,11 @@ public class JAXBWidgetType implements Serializable {
 		}
 		type.setMainGroup(this.getMainGroup());
 		//type.setLocked(this.isLocked());
+
 		type.setPluginCode(this.getPluginCode());
 		return type;
 	}
-	
+
 	public WidgetType getModifiedWidgetType(IWidgetTypeManager widgetTypeManager) throws ApiException {
 		WidgetType type = widgetTypeManager.getWidgetType(this.getCode());
 		type.setTitles(this.getTitles());
@@ -117,7 +117,7 @@ public class JAXBWidgetType implements Serializable {
 		//type.setPluginCode(this.getPluginCode());
 		return type;
 	}
-	
+
 	@XmlElement(name = "code", required = false)
 	public String getCode() {
 		return _code;
@@ -125,7 +125,7 @@ public class JAXBWidgetType implements Serializable {
 	public void setCode(String code) {
 		this._code = code;
 	}
-	
+
 	@XmlElement(name = "title", required = false)
     @XmlElementWrapper(name = "titles", required = false)
 	public ApsProperties getTitles() {
@@ -134,7 +134,7 @@ public class JAXBWidgetType implements Serializable {
 	public void setTitles(ApsProperties titles) {
 		this._titles = titles;
 	}
-	
+
 	@XmlElement(name = "typeParameter", required = false)
     @XmlElementWrapper(name = "typeParameters", required = false)
 	public List<WidgetTypeParameter> getTypeParameters() {
@@ -143,7 +143,7 @@ public class JAXBWidgetType implements Serializable {
 	public void setTypeParameters(List<WidgetTypeParameter> typeParameters) {
 		this._parameters = typeParameters;
 	}
-	
+
 	@XmlElement(name = "action", required = false)
 	public String getAction() {
 		return _action;
@@ -151,7 +151,7 @@ public class JAXBWidgetType implements Serializable {
 	public void setAction(String action) {
 		this._action = action;
 	}
-	
+
 	@XmlElement(name = "pluginCode", required = false)
 	public String getPluginCode() {
 		return _pluginCode;
@@ -159,7 +159,7 @@ public class JAXBWidgetType implements Serializable {
 	public void setPluginCode(String pluginCode) {
 		this._pluginCode = pluginCode;
 	}
-	
+
 	@XmlElement(name = "parentTypeCode", required = false)
 	protected String getParentTypeCode() {
 		return _parentTypeCode;
@@ -167,7 +167,7 @@ public class JAXBWidgetType implements Serializable {
 	protected void setParentTypeCode(String parentTypeCode) {
 		this._parentTypeCode = parentTypeCode;
 	}
-	
+
 	@XmlElement(name = "configuration", required = false)
     @XmlElementWrapper(name = "configurations", required = false)
 	public ApsProperties getConfig() {
@@ -176,7 +176,7 @@ public class JAXBWidgetType implements Serializable {
 	public void setConfig(ApsProperties config) {
 		this._config = config;
 	}
-	
+
 	@XmlElement(name = "locked", required = false)
 	public boolean isLocked() {
 		return _locked;
@@ -184,7 +184,7 @@ public class JAXBWidgetType implements Serializable {
 	public void setLocked(boolean locked) {
 		this._locked = locked;
 	}
-	
+
 	@XmlElement(name = "mainGroup", required = false)
 	public String getMainGroup() {
 		return _mainGroup;
@@ -192,7 +192,7 @@ public class JAXBWidgetType implements Serializable {
 	public void setMainGroup(String mainGroup) {
 		this._mainGroup = mainGroup;
 	}
-	
+
 	@XmlElement(name = "gui", required = false)
 	public String getGui() {
 		return _gui;
@@ -200,7 +200,7 @@ public class JAXBWidgetType implements Serializable {
 	public void setGui(String gui) {
 		this._gui = gui;
 	}
-	
+
 	@XmlElement(name = "fragment", required = false)
     @XmlElementWrapper(name = "fragments", required = false)
 	public List<JAXBGuiFragment> getFragments() {
@@ -209,8 +209,24 @@ public class JAXBWidgetType implements Serializable {
 	protected void setFragments(List<JAXBGuiFragment> fragments) {
 		this._fragments = fragments;
 	}
-	
-	private String _code;
+
+	@XmlElement(name = "readonlypagewidgetconfig", required = false)
+	public boolean isReadonlyPageWidgetConfig() {
+		return readonlyPageWidgetConfig;
+	}
+	public void setReadonlyPageWidgetConfig(boolean readonlyPageWidgetConfig) {
+		this.readonlyPageWidgetConfig = readonlyPageWidgetConfig;
+	}
+
+    @XmlElement(name = "widgetCategory")
+    public String getWidgetCategory() {
+        return widgetCategory;
+    }
+    public void setWidgetCategory(String widgetCategory) {
+        this.widgetCategory = widgetCategory;
+    }
+
+    private String _code;
 	private ApsProperties _titles;
 	private List<WidgetTypeParameter> _parameters;
 	private String _action;
@@ -221,5 +237,7 @@ public class JAXBWidgetType implements Serializable {
 	private String _mainGroup;
 	private String _gui;
 	private List<JAXBGuiFragment> _fragments;
-	
+	private boolean readonlyPageWidgetConfig;
+    private String widgetCategory;
+
 }

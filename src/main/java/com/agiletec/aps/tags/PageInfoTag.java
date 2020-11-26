@@ -13,18 +13,6 @@
  */
 package com.agiletec.aps.tags;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import javax.servlet.ServletRequest;
-import javax.servlet.jsp.JspException;
-
-import org.entando.entando.aps.tags.ExtendedTagSupport;
-import org.entando.entando.ent.util.EntLogging.EntLogger;
-import org.entando.entando.ent.util.EntLogging.EntLogFactory;
-
 import com.agiletec.aps.system.RequestContext;
 import com.agiletec.aps.system.SystemConstants;
 import com.agiletec.aps.system.services.lang.ILangManager;
@@ -36,6 +24,16 @@ import com.agiletec.aps.system.services.url.PageURL;
 import com.agiletec.aps.tags.util.IParameterParentTag;
 import com.agiletec.aps.util.ApsProperties;
 import com.agiletec.aps.util.ApsWebApplicationUtils;
+import org.entando.entando.aps.tags.ExtendedTagSupport;
+import org.entando.entando.ent.util.EntLogging.EntLogFactory;
+import org.entando.entando.ent.util.EntLogging.EntLogger;
+
+import javax.servlet.ServletRequest;
+import javax.servlet.jsp.JspException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Returns the information of the specified page. This tag can use the sub-tag
@@ -122,7 +120,11 @@ public class PageInfoTag extends ExtendedTagSupport implements IParameterParentT
 				pageUrl.addParam(name, this.getParameters().get(name));
 			}
 		}
-		this.setValue(pageUrl.getURL());
+		this.setValue(
+				org.owasp.encoder.Encode.forHtml(	// $$$
+						pageUrl.getURL()
+				)
+		);
 	}
 
 	protected void extractPageOwner(IPage page, RequestContext reqCtx) {
@@ -135,7 +137,7 @@ public class PageInfoTag extends ExtendedTagSupport implements IParameterParentT
 			this.pageContext.setAttribute(this.getVar(), this.getValue());
 		} else {
 			try {
-				if (this.getEscapeXml()) {
+				if (this.getEscapeXml()) { // $$$
 					out(this.pageContext, this.getEscapeXml(), this.getValue());
 				} else {
 					this.pageContext.getOut().print(this.getValue());

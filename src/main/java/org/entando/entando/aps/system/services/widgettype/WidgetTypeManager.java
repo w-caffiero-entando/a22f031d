@@ -13,13 +13,8 @@
  */
 package org.entando.entando.aps.system.services.widgettype;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import com.agiletec.aps.system.common.AbstractService;
 import com.agiletec.aps.system.common.FieldSearchFilter;
-import org.entando.entando.ent.exception.EntException;
 import com.agiletec.aps.system.services.group.Group;
 import com.agiletec.aps.system.services.group.GroupUtilizer;
 import com.agiletec.aps.system.services.lang.events.LangsChangedEvent;
@@ -31,8 +26,13 @@ import org.entando.entando.aps.system.services.guifragment.GuiFragmentUtilizer;
 import org.entando.entando.aps.system.services.guifragment.IGuiFragmentManager;
 import org.entando.entando.aps.system.services.widgettype.cache.IWidgetTypeManagerCacheWrapper;
 import org.entando.entando.aps.system.services.widgettype.events.WidgetTypeChangedEvent;
-import org.entando.entando.ent.util.EntLogging.EntLogger;
+import org.entando.entando.ent.exception.EntException;
 import org.entando.entando.ent.util.EntLogging.EntLogFactory;
+import org.entando.entando.ent.util.EntLogging.EntLogger;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Servizio di gestione dei tipi di widget (WidgetType) definiti nel sistema.
@@ -49,11 +49,18 @@ public class WidgetTypeManager extends AbstractService
     private IWidgetTypeDAO _widgetTypeDAO;
     private IGuiFragmentManager _guiFragmentManager;
     private IWidgetTypeManagerCacheWrapper _cacheWrapper;
+    private static final String WIDGET_TYPE_NOT_EXIST = "Widget Type not exists {}";
 
     @Override
     public void init() throws Exception {
         this.getCacheWrapper().initCache(this.getWidgetTypeDAO());
         logger.debug("{} ready. Initialized", this.getClass().getName());
+    }
+    
+    @Override
+    protected void release() {
+        this.getCacheWrapper().release();
+        super.release();
     }
 
     @Override
@@ -116,7 +123,7 @@ public class WidgetTypeManager extends AbstractService
         try {
             WidgetType type = this.getWidgetType(widgetTypeCode);
             if (null == type) {
-                logger.error("Type not exists : type code {}", widgetTypeCode);
+                logger.error(WIDGET_TYPE_NOT_EXIST , widgetTypeCode);
                 return;
             }
             if (type.isLocked()) {
@@ -147,24 +154,48 @@ public class WidgetTypeManager extends AbstractService
         }
     }
 
+    /**
+     * @deprecated
+     */
+    @Deprecated
     @Override
     public void updateWidgetType(String widgetTypeCode, ApsProperties titles, ApsProperties defaultConfig, String mainGroup,
-                                 String configUi, String bundleId) throws EntException {
+                                 String configUi, String bundleId, Boolean readonlyPageWidgetConfig) throws EntException {
+        WidgetType type = this.getWidgetType(widgetTypeCode);
+        if (null == type) {
+            logger.error(WIDGET_TYPE_NOT_EXIST, widgetTypeCode);
+            return;
+        }
+        updateWidgetType( widgetTypeCode,  titles,  defaultConfig,  mainGroup, configUi,  bundleId,  readonlyPageWidgetConfig, type.getWidgetCategory());
+    }
+
+    @Override
+    public void updateWidgetType(String widgetTypeCode, ApsProperties titles, ApsProperties defaultConfig, String mainGroup,
+                                 String configUi, String bundleId, Boolean readonlyPageWidgetConfig, String widgetCategory) throws EntException {
         try {
+
+            boolean readonlyPageWidgetConfigLocalVar;
             WidgetType type = this.getWidgetType(widgetTypeCode);
             if (null == type) {
-                logger.error("Type not exists : type code {}", widgetTypeCode);
+                logger.error(WIDGET_TYPE_NOT_EXIST, widgetTypeCode);
                 return;
             }
             if (type.isLocked() || !type.isLogic() || !type.isUserType()) {
                 defaultConfig = type.getConfig();
             }
-            this.getWidgetTypeDAO().updateWidgetType(widgetTypeCode, titles, defaultConfig, mainGroup, configUi, bundleId);
+            if (type.isLocked()) {
+                readonlyPageWidgetConfigLocalVar = type.isReadonlyPageWidgetConfig();
+            } else {
+                readonlyPageWidgetConfigLocalVar = readonlyPageWidgetConfig;
+            }
+            this.getWidgetTypeDAO().updateWidgetType(widgetTypeCode, titles, defaultConfig, mainGroup, configUi, bundleId, readonlyPageWidgetConfigLocalVar, widgetCategory);
             type.setTitles(titles);
             type.setConfig(defaultConfig);
             type.setMainGroup(mainGroup);
             type.setConfigUi(configUi);
             type.setBundleId(bundleId);
+            type.setReadonlyPageWidgetConfig(readonlyPageWidgetConfigLocalVar);
+            type.setWidgetCategory(widgetCategory);
             this.getCacheWrapper().updateWidgetType(type);
             this.notifyWidgetTypeChanging(widgetTypeCode, WidgetTypeChangedEvent.UPDATE_OPERATION_CODE);
         } catch (Throwable t) {

@@ -154,14 +154,14 @@ public class FileBrowserController {
     @RequestMapping(value = "/file", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<RestResponse<Map, Map>> deleteFile(@RequestParam String currentPath, @RequestParam Boolean protectedFolder) {
         logger.debug("delete file {} - protected {}", currentPath, protectedFolder);
-        String safeCurrentPathX =  StorageManagerUtil.mustBeValidDirName(currentPath);
-        this.getFileBrowserService().deleteFile(safeCurrentPathX, protectedFolder);
+        String safeCurrentPath =  StorageManagerUtil.mustBeValidDirName(currentPath);
+        this.getFileBrowserService().deleteFile(safeCurrentPath, protectedFolder);
         Map<String, Object> result = new HashMap<>();
         result.put(PROTECTED_FOLDER, protectedFolder);
-        result.put("path", safeCurrentPathX);
-        result.put("filename", this.getFilename(safeCurrentPathX));
+        result.put("path", safeCurrentPath);
+        result.put("filename", this.getFilename(safeCurrentPath));
         Map<String, Object> metadata = new HashMap<>();
-        metadata.put(PREV_PATH, this.getPrevFolderName(safeCurrentPathX));
+        metadata.put(PREV_PATH, this.getPrevFolderName(safeCurrentPath));
         return new ResponseEntity<>(new RestResponse<>(result, metadata), HttpStatus.OK);
     }
 

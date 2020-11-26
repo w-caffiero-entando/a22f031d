@@ -13,15 +13,12 @@
  */
 package org.entando.entando.aps.system.services.storage;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.entando.entando.ent.util.EntLogging.EntLogFactory;
 import org.entando.entando.ent.util.EntLogging.EntLogger;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.regex.*;
 import org.entando.entando.ent.exception.EntRuntimeException;
 import org.entando.entando.ent.util.EntSanitization;

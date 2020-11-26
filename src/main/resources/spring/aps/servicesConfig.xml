@@ -150,6 +150,7 @@
 
     <bean id="CategoryService" class="org.entando.entando.aps.system.services.category.CategoryService" >
         <property name="categoryManager" ref="CategoryManager" />
+        <property name="categoryValidator" ref="CategoryValidator" />
     </bean>
 
     <bean id="UserService" class="org.entando.entando.aps.system.services.user.UserService" >
@@ -193,4 +194,10 @@
     <bean id="JsonPatchValidator"
           class="org.entando.entando.aps.system.services.jsonpatch.validator.JsonPatchValidator">
     </bean>
+
+    <bean id="UserPreferencesService"
+            class="org.entando.entando.aps.system.services.userpreferences.UserPreferencesService" >
+        <property name="userPreferencesManager" ref="UserPreferencesManager" />
+    </bean>
+
 </beans>

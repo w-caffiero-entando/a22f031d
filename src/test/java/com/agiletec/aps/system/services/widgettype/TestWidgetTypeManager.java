@@ -13,23 +13,21 @@
  */
 package com.agiletec.aps.system.services.widgettype;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import javax.sql.DataSource;
-
-import org.entando.entando.aps.system.services.widgettype.IWidgetTypeManager;
-import org.entando.entando.aps.system.services.widgettype.WidgetType;
-import org.entando.entando.aps.system.services.widgettype.WidgetTypeParameter;
-
 import com.agiletec.aps.BaseTestCase;
 import com.agiletec.aps.services.mock.MockWidgetTypeDAO;
 import com.agiletec.aps.system.SystemConstants;
 import com.agiletec.aps.system.common.IManager;
-import org.entando.entando.ent.exception.EntException;
 import com.agiletec.aps.util.ApsProperties;
+import org.entando.entando.aps.system.services.widgettype.IWidgetTypeManager;
+import org.entando.entando.aps.system.services.widgettype.WidgetType;
+import org.entando.entando.aps.system.services.widgettype.WidgetTypeParameter;
+import org.entando.entando.ent.exception.EntException;
+
+import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author M.Diana - E.Santoboni
@@ -167,7 +165,7 @@ public class TestWidgetTypeManager extends BaseTestCase {
             newTitles.put("it", "Titolo modificato");
             newTitles.put("en", "Modified title");
             this._widgetTypeManager.updateWidgetType(widgetTypeCode, newTitles, type.getConfig(), type.getMainGroup(),
-                    type.getConfigUi(), type.getBundleId());
+                    type.getConfigUi(), type.getBundleId(), type.isReadonlyPageWidgetConfig());
             extracted = this._widgetTypeManager.getWidgetType(widgetTypeCode);
             assertNotNull(extracted);
             assertEquals("Titolo modificato", extracted.getTitles().get("it"));
@@ -192,18 +190,17 @@ public class TestWidgetTypeManager extends BaseTestCase {
             assertNotNull(extracted);
             assertEquals("formAction", extracted.getParentType().getCode());
             assertEquals("/myNewJsp.jsp", extracted.getConfig().get("actionPath"));
-
             ApsProperties newProperties = new ApsProperties();
             this._widgetTypeManager.updateWidgetType(widgetTypeCode, extracted.getTitles(), newProperties, type.getMainGroup(),
-                    type.getConfigUi(), type.getBundleId());
+                    type.getConfigUi(), type.getBundleId(), true, type.getWidgetCategory());
             extracted = this._widgetTypeManager.getWidgetType(widgetTypeCode);
             assertNotNull(extracted);
             assertNotNull(extracted.getConfig());
             assertEquals(0, extracted.getConfig().size());
-
+            assertTrue(extracted.isReadonlyPageWidgetConfig());
             newProperties.put("contentId", "EVN103");
             this._widgetTypeManager.updateWidgetType(widgetTypeCode, extracted.getTitles(), newProperties, type.getMainGroup(),
-                    type.getConfigUi(), type.getBundleId());
+                    type.getConfigUi(), type.getBundleId(), type.isReadonlyPageWidgetConfig(),type.getWidgetCategory());
             extracted = this._widgetTypeManager.getWidgetType(widgetTypeCode);
             assertNotNull(extracted);
             assertEquals("EVN103", extracted.getConfig().get("contentId"));
@@ -214,6 +211,61 @@ public class TestWidgetTypeManager extends BaseTestCase {
                 this._widgetTypeManager.deleteWidgetType(widgetTypeCode);
             }
             assertNull(this._widgetTypeManager.getWidgetType(widgetTypeCode));
+        }
+    }
+
+
+    public void testUpdateWithoutWidgetCategory() throws Throwable {
+        String widgetTypeCode = "test_showletType";
+        assertNull(this._widgetTypeManager.getWidgetType(widgetTypeCode));
+        try {
+            WidgetType type = this.createNewWidgetType(widgetTypeCode);
+            System.out.println("WIDGETCATEGORY :" + type.getWidgetCategory());;
+            this._widgetTypeManager.addWidgetType(type);
+            WidgetType extracted = this._widgetTypeManager.getWidgetType(widgetTypeCode);
+            assertNotNull(extracted);
+            assertEquals("formAction", extracted.getParentType().getCode());
+            assertEquals("/myNewJsp.jsp", extracted.getConfig().get("actionPath"));
+            ApsProperties newProperties = new ApsProperties();
+            this._widgetTypeManager.updateWidgetType(widgetTypeCode, extracted.getTitles(), newProperties, type.getMainGroup(),
+                    type.getConfigUi(), type.getBundleId(), true);
+            extracted = this._widgetTypeManager.getWidgetType(widgetTypeCode);
+            assertNotNull(extracted);
+            assertNotNull(extracted.getConfig());
+            assertEquals("test",extracted.getWidgetCategory());
+            assertEquals(0, extracted.getConfig().size());
+            assertTrue(extracted.isReadonlyPageWidgetConfig());
+            newProperties.put("contentId", "EVN103");
+            this._widgetTypeManager.updateWidgetType(widgetTypeCode, extracted.getTitles(), newProperties, type.getMainGroup(),
+                    type.getConfigUi(), type.getBundleId(), type.isReadonlyPageWidgetConfig(),type.getWidgetCategory());
+            extracted = this._widgetTypeManager.getWidgetType(widgetTypeCode);
+            assertNotNull(extracted);
+            assertEquals("EVN103", extracted.getConfig().get("contentId"));
+        } catch (Throwable t) {
+            throw t;
+        } finally {
+            if (null != this._widgetTypeManager.getWidgetType(widgetTypeCode)) {
+                this._widgetTypeManager.deleteWidgetType(widgetTypeCode);
+            }
+            assertNull(this._widgetTypeManager.getWidgetType(widgetTypeCode));
+        }
+    }
+
+
+    public void testUpdateReadOnlyPageConfigLockedWidget() throws Throwable {
+        String widgetTypeCode = "entando_apis";
+        WidgetType widgetType = _widgetTypeManager.getWidgetType(widgetTypeCode);
+
+        try {
+            assertNotNull(widgetType);
+            this._widgetTypeManager.updateWidgetType(widgetTypeCode, widgetType.getTitles(), widgetType.getConfig(), widgetType.getMainGroup(),
+                    widgetType.getConfigUi(), widgetType.getBundleId(), false);
+            WidgetType updated = this._widgetTypeManager.getWidgetType(widgetTypeCode);
+            assertNotNull(updated);
+            assertNotNull(updated.getConfig());
+            assertTrue(updated.isReadonlyPageWidgetConfig());
+        } catch (Throwable t) {
+            throw t;
         }
     }
 
@@ -231,6 +283,8 @@ public class TestWidgetTypeManager extends BaseTestCase {
         ApsProperties config = new ApsProperties();
         config.put("actionPath", "/myNewJsp.jsp");
         type.setConfig(config);
+        type.setWidgetCategory("test");
+        type.setReadonlyPageWidgetConfig(false);
         return type;
     }
 

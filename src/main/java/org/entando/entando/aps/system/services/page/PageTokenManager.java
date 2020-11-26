@@ -26,6 +26,7 @@ import java.util.Map;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 import org.apache.commons.lang.RandomStringUtils;
@@ -38,10 +39,15 @@ public class PageTokenManager extends AbstractService implements IPageTokenManag
 
 	private static final EntLogger logger = EntLogFactory.getSanitizedLogger(PageTokenManager.class);
 
+	private static final byte[] IV = new byte[] {
+			0x61, 0x64 , 0x30, 0x32 , 0x36, 0x66 , 0x63, 0x31
+			, 0x2d, 0x37 , 0x38, 0x37 , 0x65, 0x2d , 0x34, 0x36};
+
 	private static final int SALT_LENGTH = 8;
 	private static final int HASH_LENGTH = 20;
-	public static final String KEYGEN_CIPHER = "AES/GCM/NoPadding";
-	public static final String ENCRYPTION_CIPHER = "AES/GCM/NoPadding";
+	public static final String KEYGEN_CIPHER = "PBEWithHmacSHA256AndAES_256";
+	// Best we can do with a plain openjdk8
+	public static final String ENCRYPTION_CIPHER = "PBEWithHmacSHA256AndAES_256";
 
 	private String salt;
 	private String password;
@@ -74,13 +80,14 @@ public class PageTokenManager extends AbstractService implements IPageTokenManag
 	}
 
 	@Override
-	public String generateToken(String pageCode) {
+	public String encrypt(String pageCode) {
 		SecretKeyFactory keyFactory;
 		try {
 			keyFactory = SecretKeyFactory.getInstance(KEYGEN_CIPHER);
 			SecretKey key = keyFactory.generateSecret(new PBEKeySpec(this.getPasswordCharArray()));
-			Cipher pbeCipher = Cipher.getInstance(ENCRYPTION_CIPHER);
-			pbeCipher.init(Cipher.ENCRYPT_MODE, key, new PBEParameterSpec(this.getSalt().getBytes(), 20));
+			// Good enough for the page token although the salt generation can be better
+			Cipher pbeCipher = Cipher.getInstance(ENCRYPTION_CIPHER);	//NOSONAR
+			pbeCipher.init(Cipher.ENCRYPT_MODE, key, new PBEParameterSpec(this.getSalt().getBytes(), 20, new IvParameterSpec(IV)));
 			return base64Encode(pbeCipher.doFinal(pageCode.getBytes(StandardCharsets.UTF_8)));
 		} catch (GeneralSecurityException e) {
 			logger.error("Error during token generation for page code: {}", pageCode, e);
@@ -88,6 +95,22 @@ public class PageTokenManager extends AbstractService implements IPageTokenManag
 					String.format("Error during token generation for page code: \"%s\"", pageCode),
 					e);
 		}
+	}
+
+	@Override
+	public String decrypt(String property) {
+		SecretKeyFactory keyFactory;
+		try {
+			keyFactory = SecretKeyFactory.getInstance(KEYGEN_CIPHER);
+			SecretKey key = keyFactory.generateSecret(new PBEKeySpec(this.getPasswordCharArray()));
+			// Good enough for the page token although the salt generation can be better
+			Cipher pbeCipher = Cipher.getInstance(ENCRYPTION_CIPHER);	//NOSONAR
+			pbeCipher.init(Cipher.DECRYPT_MODE, key, new PBEParameterSpec(this.getSalt().getBytes(), 20, new IvParameterSpec(IV)));
+			return new String(pbeCipher.doFinal(base64Decode(property)), StandardCharsets.UTF_8);
+		} catch (GeneralSecurityException | IOException e) {
+			logger.error("Error in decrypt", e);
+		}
+		return null;
 	}
 
 	protected void generateInternalSaltAndPassword(String param) {

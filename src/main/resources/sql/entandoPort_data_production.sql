@@ -230,7 +230,7 @@ INSERT INTO localstrings (keycode, langcode, stringvalue) VALUES ('ENTANDO_API_S
 
 
 
-INSERT INTO pagemodels (code, descr, frames, plugincode, templategui) VALUES ('service', 'Service Page', '<frames>
+INSERT INTO pagemodels (code, descr, frames, plugincode, templategui) VALUES ('single_frame_page', 'Single Frame Page', '<frames>
 	<frame pos="0">
 		<descr>Sample Frame</descr>
 	</frame>
@@ -261,22 +261,22 @@ INSERT INTO pages_metadata_online (code, groupcode, titles, modelcode, showinmen
 <properties>
 <property key="it">Pagine di Servizio</property>
 <property key="en">Service</property>
-</properties>', 'service', 0, NULL, '2017-02-17 13:06:24');
+</properties>', 'single_frame_page', 0, NULL, '2017-02-17 13:06:24');
 INSERT INTO pages_metadata_online (code, groupcode, titles, modelcode, showinmenu, extraconfig, updatedat) VALUES ('login', 'free', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="it">Pagina di login</property>
 <property key="en">Login</property>
-</properties>', 'service', 1, NULL, '2017-02-17 15:32:34');
+</properties>', 'single_frame_page', 1, NULL, '2017-02-17 15:32:34');
 INSERT INTO pages_metadata_online (code, groupcode, titles, modelcode, showinmenu, extraconfig, updatedat) VALUES ('notfound', 'free', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="en">Page not found</property>
 <property key="it">Pagina non trovata</property>
-</properties>', 'service', 1, NULL, '2017-02-17 16:37:10');
+</properties>', 'single_frame_page', 1, NULL, '2017-02-17 16:37:10');
 INSERT INTO pages_metadata_online (code, groupcode, titles, modelcode, showinmenu, extraconfig, updatedat) VALUES ('errorpage', 'free', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="en">Error page</property>
 <property key="it">Pagina di errore</property>
-</properties>', 'service', 1, NULL, '2017-02-17 21:11:54');
+</properties>', 'single_frame_page', 1, NULL, '2017-02-17 21:11:54');
 INSERT INTO pages_metadata_online (code, groupcode, titles, modelcode, showinmenu, extraconfig, updatedat) VALUES ('homepage', 'free', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="en">Home</property>
@@ -287,39 +287,39 @@ INSERT INTO pages_metadata_draft (code, groupcode, titles, modelcode, showinmenu
 <properties>
 <property key="it">Pagine di Servizio</property>
 <property key="en">Service</property>
-</properties>', 'service', 0, NULL, '2017-02-17 13:06:24');
+</properties>', 'single_frame_page', 0, NULL, '2017-02-17 13:06:24');
 INSERT INTO pages_metadata_draft (code, groupcode, titles, modelcode, showinmenu, extraconfig, updatedat) VALUES ('login', 'free', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="it">Pagina di login</property>
 <property key="en">Login</property>
-</properties>', 'service', 1, NULL, '2017-02-17 15:32:34');
+</properties>', 'single_frame_page', 1, NULL, '2017-02-17 15:32:34');
 INSERT INTO pages_metadata_draft (code, groupcode, titles, modelcode, showinmenu, extraconfig, updatedat) VALUES ('notfound', 'free', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="en">Page not found</property>
 <property key="it">Pagina non trovata</property>
-</properties>', 'service', 1, NULL, '2017-02-17 16:37:10');
+</properties>', 'single_frame_page', 1, NULL, '2017-02-17 16:37:10');
 INSERT INTO pages_metadata_draft (code, groupcode, titles, modelcode, showinmenu, extraconfig, updatedat) VALUES ('errorpage', 'free', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="en">Error page</property>
 <property key="it">Pagina di errore</property>
-</properties>', 'service', 1, NULL, '2017-02-17 21:11:54');
+</properties>', 'single_frame_page', 1, NULL, '2017-02-17 21:11:54');
 INSERT INTO pages_metadata_draft (code, groupcode, titles, modelcode, showinmenu, extraconfig, updatedat) VALUES ('homepage', 'free', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="en">Home</property>
 <property key="it">Home</property>
 </properties>', 'home', 1, NULL, '2017-02-18 00:12:24');
 
-INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup) VALUES ('messages_system', '<?xml version="1.0" encoding="UTF-8"?>
+INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup, readonlypagewidgetconfig, widgetcategory) VALUES ('messages_system', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="en">System Messages</property>
 <property key="it">Messaggi di Sistema</property>
-</properties>', NULL, NULL, NULL, NULL, 1, NULL);
-INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup) VALUES ('login_form', '<?xml version="1.0" encoding="UTF-8"?>
+</properties>', NULL, NULL, NULL, NULL, 1, NULL, 0, 'system');
+INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup, readonlypagewidgetconfig, widgetcategory) VALUES ('login_form', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
-<property key="en">Login Form</property>
-<property key="it">Form di Login</property>
-</properties>', NULL, NULL, NULL, NULL, 1, NULL);
-INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup) VALUES ('formAction', '<?xml version="1.0" encoding="UTF-8"?>
+<property key="en">Legacy Login Form</property>
+<property key="it">Form di Login Legacy</property>
+</properties>', NULL, NULL, NULL, NULL, 1, NULL, 0,'system');
+INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup, readonlypagewidgetconfig, widgetcategory) VALUES ('formAction', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="en">Internal Servlet</property>
 <property key="it">Invocazione di una Servlet Interna</property>
@@ -328,8 +328,8 @@ INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode,
 		Path to an action or to a JSP. You must prepend ''/ExtStr2'' to any Struts2 action path
 	</parameter>
 	<action name="configSimpleParameter"/>
-</config>', NULL, NULL, NULL, 1, NULL);
-INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup) VALUES ('entando_apis', '<?xml version="1.0" encoding="UTF-8"?>
+</config>', NULL, NULL, NULL, 1, NULL, 0, 'system');
+INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, maingroup, readonlypagewidgetconfig, widgetcategory) VALUES ('entando_apis', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="en">APIs</property>
 <property key="it">APIs</property>
@@ -338,31 +338,31 @@ INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode,
 <properties>
 <property key="actionPath">/ExtStr2/do/Front/Api/Resource/list.action</property>
 </properties>
-', 1, 'free');
-INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked) VALUES ('userprofile_editCurrentUser', '<?xml version="1.0" encoding="UTF-8"?>
+', 1, 'free', 1, 'system');
+INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, readonlypagewidgetconfig, widgetcategory) VALUES ('userprofile_editCurrentUser', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
-<property key="en">Edit Current User</property>
-<property key="it">Edita Utente Corrente</property>
+<property key="en">Edit Profile and Password</property>
+<property key="it">Edita Profilo e Password</property>
 </properties>', NULL, NULL, 'formAction', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="actionPath">/ExtStr2/do/Front/CurrentUser/edit.action</property>
-</properties>', 1);
-INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked) VALUES ('userprofile_editCurrentUser_password', '<?xml version="1.0" encoding="UTF-8"?>
+</properties>', 1, 1, 'user');
+INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, readonlypagewidgetconfig, widgetcategory) VALUES ('userprofile_editCurrentUser_password', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
-<property key="en">Edit Current User Password</property>
-<property key="it">Edita Password Utente Corrente</property>
+<property key="en">Edit User Password</property>
+<property key="it">Edita Password Utente</property>
 </properties>', NULL, NULL, 'formAction', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="actionPath">/ExtStr2/do/Front/CurrentUser/editPassword.action</property>
-</properties>', 1);
-INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked) VALUES ('userprofile_editCurrentUser_profile', '<?xml version="1.0" encoding="UTF-8"?>
+</properties>', 1, 1, 'user');
+INSERT INTO widgetcatalog (code, titles, parameters, plugincode, parenttypecode, defaultconfig, locked, readonlypagewidgetconfig, widgetcategory) VALUES ('userprofile_editCurrentUser_profile', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
-<property key="en">Edit Current User Profile</property>
-<property key="it">Edita Profilo Utente Corrente</property>
+<property key="en">Edit User Profile</property>
+<property key="it">Edita Profilo Utente</property>
 </properties>', NULL, NULL, 'formAction', '<?xml version="1.0" encoding="UTF-8"?>
 <properties>
 <property key="actionPath">/ExtStr2/do/Front/CurrentUser/Profile/edit.action</property>
-</properties>', 1);
+</properties>', 1, 1, 'user');
 
 INSERT INTO guifragment (code, widgettypecode, plugincode, gui, defaultgui, locked) VALUES ('userprofile_editCurrentUser_profile', 'userprofile_editCurrentUser_profile', NULL, NULL, '<#assign s=JspTaglibs["/struts-tags"]>
 <#assign wp=JspTaglibs["/aps-core"]>
@@ -1655,7 +1655,7 @@ INSERT INTO guifragment (code, widgettypecode, plugincode, gui, defaultgui, lock
 			<input type="submit" value="<@wp.i18n key="SIGNIN" />" class="btn btn-primary" />
 		</div>
 	</form>
-</#if>', 1);
+</#if>', 0);
 INSERT INTO guifragment (code, widgettypecode, plugincode, gui, defaultgui, locked) VALUES ('internal_servlet_generic_error', NULL, NULL, NULL, '<#assign wp=JspTaglibs["/aps-core"]>
 <@wp.i18n key="GENERIC_ERROR" />', 1);
 INSERT INTO guifragment (code, widgettypecode, plugincode, gui, defaultgui, locked) VALUES ('internal_servlet_user_not_allowed', NULL, NULL, NULL, '<#assign wp=JspTaglibs["/aps-core"]>
@@ -1673,7 +1673,7 @@ INSERT INTO guifragment (code, widgettypecode, plugincode, gui, defaultgui, lock
 <div class="alert alert-error alert-block">
 	<h1 class="alert-heading"><@wp.i18n key="GENERIC_ERROR" escapeXml=false /></h1>
 </div>
-</#if>', 1);
+</#if>', 0);
 INSERT INTO guifragment (code, widgettypecode, plugincode, gui, defaultgui, locked) VALUES ('default_pagerBlock', NULL, NULL, NULL, '<#assign wp=JspTaglibs["/aps-core"]>
 
 <#if (group.size > group.max)>
@@ -1832,10 +1832,9 @@ INSERT INTO sysconfig (version, item, descr, config) values ('production', 'user
 					<role>userprofile:fullname</role>
 				</roles>
 			</attribute>
-			<attribute name="email" attributetype="Monotext" description="Email" searchable="true">
+			<attribute name="email" attributetype="Email" description="Email" searchable="true">
 				<validations>
 					<required>true</required>
-					<regexp><![CDATA[.+@.+.[a-z]+]]></regexp>
 				</validations>
 				<roles>
 					<role>userprofile:email</role>

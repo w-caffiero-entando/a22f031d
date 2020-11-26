@@ -14,13 +14,14 @@
 package org.entando.entando.web.group;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.entando.entando.ent.exception.EntException;
 import com.agiletec.aps.system.services.group.Group;
 import com.agiletec.aps.system.services.group.IGroupManager;
 import com.agiletec.aps.system.services.role.Permission;
@@ -29,12 +30,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.entando.entando.aps.system.services.group.GroupTestHelper;
 import org.entando.entando.aps.system.services.group.IGroupService;
 import org.entando.entando.aps.system.services.group.model.GroupDto;
+import org.entando.entando.ent.exception.EntException;
 import org.entando.entando.web.AbstractControllerIntegrationTest;
+import org.entando.entando.web.MockMvcHelper;
+import org.entando.entando.web.analysis.AnalysisControllerDiffAnalysisEngineTestsStubs;
 import org.entando.entando.web.group.model.GroupRequest;
 import org.entando.entando.web.group.validator.GroupValidator;
 import org.entando.entando.web.utils.OAuth2TestUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -47,6 +53,16 @@ public class GroupControllerIntegrationTest extends AbstractControllerIntegratio
 
     @Autowired
     private IGroupManager groupManager;
+
+    private MockMvcHelper mockMvcHelper;
+
+    private ObjectMapper mapper = new ObjectMapper();
+
+    @Before
+    public void init() {
+        UserDetails user = new OAuth2TestUtils.UserBuilder("jack_bauer", "0x24").grantedToRoleAdmin().build();
+        this.mockMvcHelper = new MockMvcHelper(mockMvc, mockOAuthInterceptor(user));
+    }
 
     @Test
     public void testGetGroupsPagination() throws Exception {
@@ -66,8 +82,8 @@ public class GroupControllerIntegrationTest extends AbstractControllerIntegratio
 
             ResultActions result = mockMvc.perform(
                     get("/groups")
-                    .param("pageSize", "5")
-                    .header("Authorization", "Bearer " + accessToken));
+                            .param("pageSize", "5")
+                            .header("Authorization", "Bearer " + accessToken));
 
             result.andExpect(status().isOk());
 
@@ -80,9 +96,9 @@ public class GroupControllerIntegrationTest extends AbstractControllerIntegratio
             //-------------
             result = mockMvc.perform(
                     get("/groups")
-                    .param("pageSize", "5")
-                    .param("page", "1")
-                    .header("Authorization", "Bearer " + accessToken));
+                            .param("pageSize", "5")
+                            .param("page", "1")
+                            .header("Authorization", "Bearer " + accessToken));
 
             result.andExpect(status().isOk());
 
@@ -95,9 +111,9 @@ public class GroupControllerIntegrationTest extends AbstractControllerIntegratio
             //-------------
             result = mockMvc.perform(
                     get("/groups")
-                    .param("pageSize", "5")
-                    .param("page", "7")
-                    .header("Authorization", "Bearer " + accessToken));
+                            .param("pageSize", "5")
+                            .param("page", "7")
+                            .header("Authorization", "Bearer " + accessToken));
 
             result.andExpect(status().isOk());
 
@@ -110,27 +126,27 @@ public class GroupControllerIntegrationTest extends AbstractControllerIntegratio
             //-------------
             result = mockMvc.perform(
                     get("/groups")
-                    .param("pageSize", "0")
-                    .param("page", "7")
-                    .header("Authorization", "Bearer " + accessToken));
+                            .param("pageSize", "0")
+                            .param("page", "7")
+                            .header("Authorization", "Bearer " + accessToken));
 
             result.andExpect(status().isNotFound());
 
             //-------------
             result = mockMvc.perform(
                     get("/groups")
-                    .param("pageSize", "7")
-                    .param("page", "0")
-                    .header("Authorization", "Bearer " + accessToken));
+                            .param("pageSize", "7")
+                            .param("page", "0")
+                            .header("Authorization", "Bearer " + accessToken));
 
             result.andExpect(status().isBadRequest());
 
             //-------------
             result = mockMvc.perform(
                     get("/groups")
-                    .param("pageSize", "1")
-                    .param("page", "7")
-                    .header("Authorization", "Bearer " + accessToken));
+                            .param("pageSize", "1")
+                            .param("page", "7")
+                            .header("Authorization", "Bearer " + accessToken));
 
             result.andExpect(status().isOk());
 
@@ -154,49 +170,28 @@ public class GroupControllerIntegrationTest extends AbstractControllerIntegratio
 
         ResultActions result = mockMvc.perform(
                 get("/groups").param("page", "0")
-                .param("direction", "DESC")
-                .header("Authorization", "Bearer " + accessToken));
+                        .param("direction", "DESC")
+                        .header("Authorization", "Bearer " + accessToken));
         result.andExpect(status().isBadRequest());
 
         result = mockMvc.perform(
                 get("/groups").param("page", "1")
-                .param("direction", "DESC")
-                .header("Authorization", "Bearer " + accessToken));
+                        .param("direction", "DESC")
+                        .header("Authorization", "Bearer " + accessToken));
         result.andExpect(status().isOk());
         result.andExpect(jsonPath("$.payload.[0].code", is("management")));
 
         result = mockMvc.perform(
                 get("/groups").param("page", "1")
-                .param("pageSize", "4")
-                .param("direction", "ASC")
-                .header("Authorization", "Bearer " + accessToken));
+                        .param("pageSize", "4")
+                        .param("direction", "ASC")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andDo(print());
         result.andExpect(status().isOk());
         result.andExpect(jsonPath("$.payload[0].code", is("administrators")));
 
     }
 
-    @Test
-    public void testAddExistingGroup() throws Exception {
-        UserDetails user = new OAuth2TestUtils.UserBuilder("jack_bauer", "0x24").grantedToRoleAdmin().build();
-        String accessToken = mockOAuthInterceptor(user);
-
-        GroupDto group = this.groupService.getGroup(Group.FREE_GROUP_NAME);
-        GroupRequest groupRequest = new GroupRequest();
-        groupRequest.setCode(group.getCode());
-        groupRequest.setName(group.getName());
-
-        ObjectMapper mapper = new ObjectMapper();
-        String payload = mapper.writeValueAsString(groupRequest);
-
-        ResultActions result = mockMvc.perform(
-                post("/groups")
-                .content(payload)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .header("Authorization", "Bearer " + accessToken));
-
-        result.andExpect(status().isConflict());
-
-    }
 
     @Test
     public void testGetInvalidGroup() throws Exception {
@@ -210,7 +205,7 @@ public class GroupControllerIntegrationTest extends AbstractControllerIntegratio
 
         ResultActions result = mockMvc.perform(
                 get("/groups/{code}", "invalid_code")
-                .header("Authorization", "Bearer " + accessToken));
+                        .header("Authorization", "Bearer " + accessToken));
 
         result.andExpect(status().isNotFound());
         result.andExpect(jsonPath("$.errors[0].code", is(GroupValidator.ERRCODE_GROUP_NOT_FOUND)));
@@ -231,9 +226,9 @@ public class GroupControllerIntegrationTest extends AbstractControllerIntegratio
 
         ResultActions result = mockMvc.perform(
                 put("/groups/{code}", groupRequest.getCode())
-                .content(payload)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .header("Authorization", "Bearer " + accessToken));
+                        .content(payload)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .header("Authorization", "Bearer " + accessToken));
 
         result.andExpect(status().isNotFound());
         result.andExpect(jsonPath("$.errors[0].code", is(GroupValidator.ERRCODE_GROUP_NOT_FOUND)));
@@ -246,17 +241,17 @@ public class GroupControllerIntegrationTest extends AbstractControllerIntegratio
         String accessToken = mockOAuthInterceptor(user);
         ResultActions result = mockMvc.perform(
                 get("/groups/{code}", Group.FREE_GROUP_NAME)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .header("Authorization", "Bearer " + accessToken));
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .header("Authorization", "Bearer " + accessToken));
         result.andExpect(status().isOk());
         result.andExpect(jsonPath("$.payload.references.length()", is(4)));
         String[] managers = "PageManager,DataObjectManager,WidgetTypeManager,AuthorizationManager".split(",");
         for (String managerName : managers) {
             result = mockMvc.perform(
                     get("/groups/{code}/references/{manager}", Group.FREE_GROUP_NAME, managerName)
-                    .param("page", "1").param("pageSize", "3")
-                    .contentType(MediaType.APPLICATION_JSON_VALUE)
-                    .header("Authorization", "Bearer " + accessToken));
+                            .param("page", "1").param("pageSize", "3")
+                            .contentType(MediaType.APPLICATION_JSON_VALUE)
+                            .header("Authorization", "Bearer " + accessToken));
         }
     }
 
@@ -287,7 +282,8 @@ public class GroupControllerIntegrationTest extends AbstractControllerIntegratio
                 .andExpect(jsonPath("$.payload.type", is(GroupController.COMPONENT_ID)))
                 .andExpect(jsonPath("$.payload.code", is(code)))
                 .andExpect(jsonPath("$.payload.usage", is(12)))
-                .andReturn();;
+                .andReturn();
+        ;
     }
 
 
@@ -305,9 +301,9 @@ public class GroupControllerIntegrationTest extends AbstractControllerIntegratio
 
         ResultActions result = mockMvc.perform(
                 post("/groups")
-                .content(payload)
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + accessToken));
+                        .content(payload)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + accessToken));
 
         result.andExpect(status().isBadRequest());
 
@@ -323,6 +319,62 @@ public class GroupControllerIntegrationTest extends AbstractControllerIntegratio
         mockMvc.perform(get("/groups")
                 .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isOk());
+    }
+
+
+    @Test
+    public void addExistingGroupShouldReturnTheReceivedCategory() throws Exception {
+
+        GroupRequest groupRequest = GroupTestHelper.stubTestGroupRequest();
+
+        try {
+            mockMvcHelper.postMockMvc("/groups", groupRequest).andExpect(status().is2xxSuccessful());
+
+            ResultActions resultActions = mockMvcHelper.postMockMvc("/groups", groupRequest).andExpect(status().is2xxSuccessful());
+
+            GroupTestHelper.assertGroups(GroupTestHelper.stubGroupDto(), resultActions);
+        } finally {
+            mockMvcHelper.deleteMockMvc("/groups/" + groupRequest.getCode(), groupRequest).andExpect(status().is2xxSuccessful());
+        }
+    }
+
+    @Test
+    public void addExistingGroupWithDifferentNameShouldReturn409() throws Exception {
+
+        GroupRequest groupRequest = GroupTestHelper.stubTestGroupRequest();
+
+        try {
+            mockMvcHelper.postMockMvc("/groups", groupRequest).andExpect(status().is2xxSuccessful());
+
+            // try adding new group with different name
+            GroupRequest groupRequest2 = GroupTestHelper.stubTestGroupRequest();
+            groupRequest2.setName("new_name");
+
+            mockMvcHelper.postMockMvc("/groups", groupRequest2).andExpect(status().isConflict());
+
+        } finally {
+            mockMvcHelper.deleteMockMvc("/groups/" + groupRequest.getCode(), groupRequest).andExpect(status().is2xxSuccessful());
+        }
+
+    }
+
+    @Test
+    public void testComponentExistenceAnalysis() throws Exception {
+
+        AnalysisControllerDiffAnalysisEngineTestsStubs.testComponentEngineAnalysisResult(
+                AnalysisControllerDiffAnalysisEngineTestsStubs.COMPONENT_GROUPS,
+                "free",
+                AnalysisControllerDiffAnalysisEngineTestsStubs.STATUS_DIFF,
+                new ContextOfControllerTests(mockMvc, mapper)
+        );
+
+        // should return NEW for NON existing component
+        AnalysisControllerDiffAnalysisEngineTestsStubs.testComponentEngineAnalysisResult(
+                AnalysisControllerDiffAnalysisEngineTestsStubs.COMPONENT_GROUPS,
+                "AN_NONEXISTENT_CODE",
+                AnalysisControllerDiffAnalysisEngineTestsStubs.STATUS_NEW,
+                new ContextOfControllerTests(mockMvc, mapper)
+        );
     }
 
 }

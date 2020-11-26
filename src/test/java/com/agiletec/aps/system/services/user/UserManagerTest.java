@@ -172,7 +172,7 @@ public class UserManagerTest {
     }
 
     private void mockUsersMixed() throws Exception {
-        for (int i = 4; i <= 5; i++) {
+        for (int i = 1; i <= 5; i++) {
             UserDetails user = this.mockUserPlainText("user_" + i, "password_" + i);
             users.add(user);
         }

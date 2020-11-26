@@ -18,10 +18,6 @@ import com.agiletec.aps.system.services.page.IPageManager;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.entando.entando.aps.system.exception.RestServerError;
 import org.entando.entando.aps.system.init.IComponentManager;
@@ -29,8 +25,13 @@ import org.entando.entando.aps.system.init.model.Component;
 import org.entando.entando.aps.system.services.DtoBuilder;
 import org.entando.entando.aps.system.services.widgettype.WidgetType;
 import org.entando.entando.aps.system.services.widgettype.WidgetTypeParameter;
-import org.entando.entando.ent.util.EntLogging.EntLogger;
 import org.entando.entando.ent.util.EntLogging.EntLogFactory;
+import org.entando.entando.ent.util.EntLogging.EntLogger;
+
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 
 public class WidgetDtoBuilder extends DtoBuilder<WidgetType, WidgetDto> {
 
@@ -63,6 +64,7 @@ public class WidgetDtoBuilder extends DtoBuilder<WidgetType, WidgetDto> {
         String pluginCode = src.getPluginCode();
         Component plugin = this.getComponentManager().getInstalledComponent(pluginCode);
         dest.setPluginCode(pluginCode);
+        dest.setLocked(src.isLocked());
         dest.setPluginDesc(plugin != null ? plugin.getDescription() : null);
         List<WidgetTypeParameter> params = src.getTypeParameters();
         Map<String, Object> configUi = parseConfigUi(src);
@@ -70,6 +72,8 @@ public class WidgetDtoBuilder extends DtoBuilder<WidgetType, WidgetDto> {
         dest.setConfig(src.getConfig());
         dest.setConfigUi(configUi);
         dest.setBundleId(src.getBundleId());
+        dest.setReadonlyPageWidgetConfig(src.isReadonlyPageWidgetConfig());
+        dest.setWidgetCategory(src.getWidgetCategory());
         if (null != pluginCode && pluginCode.trim().length() > 0) {
             dest.setTypology(pluginCode);
         } else if (src.isUserType()) {

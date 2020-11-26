@@ -401,7 +401,7 @@ public class PageServiceTest {
 
         try {
             when(pageManager.getDraftPage(page.getCode())).thenReturn(page);
-            when(pageTokenManager.generateToken(page.getCode())).thenReturn(PageMockHelper.TOKEN);
+            when(pageTokenManager.encrypt(page.getCode())).thenReturn(PageMockHelper.TOKEN);
             when(dtoBuilder.convert(any(IPage.class))).thenReturn(pageDto);
             when(applicationContext.getBeanNamesForType((Class<?>) any())).thenReturn(PageMockHelper.UTILIZERS);
             when(applicationContext.getBean(anyString())).thenReturn(pageUtilizer);
