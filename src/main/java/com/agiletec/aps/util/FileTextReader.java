@@ -96,23 +96,22 @@ public class FileTextReader {
     }
 
     public static File createTempFile(String filename, InputStream is) throws IOException {
-        String tempDir = System.getProperty("java.io.tmpdir");
-        String filePath = tempDir + File.separator + filename;
+        String javaTempDirRoot = System.getProperty("java.io.tmpdir");
+        String tempFilePath = javaTempDirRoot + File.separator + filename;
         FileOutputStream outStream = null;
         try {
             byte[] buffer = new byte[1024];
             int length = -1;
-            // PATH-TRAVERSAL-CHECK
-            if (!LocalStorageManager.isSubPathOf(tempDir, filePath)) {
+            if (LocalStorageManager.isSubPathOf(javaTempDirRoot, tempFilePath)) {
+                outStream = new FileOutputStream(tempFilePath);
+                while ((length = is.read(buffer)) != -1) {
+                    outStream.write(buffer, 0, length);
+                    outStream.flush();
+                }
+            } else {
                 throw new EntRuntimeException(
-                        String.format("Path validation failed: \"%s\" not in \"%s\"", filePath, tempDir)
+                        String.format("Path validation failed: \"%s\" not in \"%s\"", tempFilePath, javaTempDirRoot)
                 );
-            }
-            //-
-            outStream = new FileOutputStream(filePath);
-            while ((length = is.read(buffer)) != -1) {
-                outStream.write(buffer, 0, length);
-                outStream.flush();
             }
         } catch (IOException t) {
             logger.error("Error on saving temporary file", t);
@@ -125,7 +124,7 @@ public class FileTextReader {
                 is.close();
             }
         }
-        return new File(filePath);
+        return new File(tempFilePath);
     }
 
     public static byte[] fileToByteArray(File file) throws IOException {

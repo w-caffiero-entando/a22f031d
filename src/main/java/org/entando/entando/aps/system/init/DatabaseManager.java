@@ -525,7 +525,7 @@ public class DatabaseManager extends AbstractInitializerManager
             String baseDir = this.getLocalBackupsFolder();
             String directoryName = baseDir + subFolderName;
 
-            if (!FileUtils.directoryContains(new File(baseDir), new File(directoryName))) {
+            if (FileUtils.directoryContains(new File(baseDir), new File(directoryName))) {
                 this.getStorageManager().deleteDirectory(directoryName, true);
             } else {
                 throw new EntRuntimeException(
@@ -585,17 +585,17 @@ public class DatabaseManager extends AbstractInitializerManager
     }
 
     private boolean checkBackupFolder(String subFolderName) throws EntException, IOException {
-        String dirName = this.getLocalBackupsFolder();
-        String reportFileName = dirName + subFolderName + File.separator + DUMP_REPORT_FILE_NAME;
+        String localBackupFolderRoot = this.getLocalBackupsFolder();
+        String reportFileName = localBackupFolderRoot + subFolderName + File.separator + DUMP_REPORT_FILE_NAME;
 
-        if (LocalStorageManager.isSubPathOf(dirName, reportFileName)) {
+        if (LocalStorageManager.isSubPathOf(localBackupFolderRoot, reportFileName)) {
             if (!this.getStorageManager().exists(reportFileName, true)) {
                 logger.warn("dump report file name not found in path {}", reportFileName);
                 return false;
             }
         } else {
             throw new EntRuntimeException(
-                    String.format("Path validation failed: \"%s\" not in \"%s\"", reportFileName, dirName)
+                    String.format("Path validation failed: \"%s\" not in \"%s\"", reportFileName, localBackupFolderRoot)
             );
         }
 

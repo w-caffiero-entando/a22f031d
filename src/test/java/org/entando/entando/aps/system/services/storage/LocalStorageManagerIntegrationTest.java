@@ -29,6 +29,8 @@ import org.entando.entando.aps.system.init.DatabaseManager;
 import org.entando.entando.ent.exception.EntRuntimeException;
 import org.entando.entando.ent.util.EntLogging.EntLogger;
 import org.entando.entando.ent.util.EntLogging.EntLogFactory;
+import org.hamcrest.CoreMatchers;
+import org.junit.Assert;
 
 /**
  * @author S.Loru - E.Santoboni
@@ -150,7 +152,14 @@ public class LocalStorageManagerIntegrationTest extends BaseTestCase {
             this._localStorageManager.createDirectory("/../../../dev/mydir", false);
             assert(false);
         } catch (EntRuntimeException t) {
-            assertEquals("Path traversal detected", t.getCause().getMessage());
+            Assert.assertThat(t.getCause().getMessage(), CoreMatchers.startsWith("Path traversal detected"));
+        } catch (Throwable t) {
+            assert(false);
+        }
+
+        try {
+            this._localStorageManager.createDirectory("target/mydir", false);
+            assert(true);
         } catch (Throwable t) {
             assert(false);
         }
