@@ -74,64 +74,59 @@ public class LocalStorageManager implements IStorageManager {
 	@Override
 	public boolean deleteFile(String subPath, boolean isProtectedResource) {
 		subPath = (null == subPath) ? "" : subPath;
-		String diskRoot = (!isProtectedResource) ? this.getBaseDiskRoot() : this.getProtectedBaseDiskRoot();
-		String fullPath = this.createFullPath(subPath, isProtectedResource);
-		try {
-			File fileUnsafe = new File(fullPath);
-			File directory = new File(diskRoot);
-			if (FileUtils.directoryContains(directory, fileUnsafe)) {
+		return withValidPath(subPath, isProtectedResource, (basePath, fullPath) -> {
+			try {
+				File fileUnsafe = new File(fullPath);
+				File directory = new File(basePath);
 				if (fileUnsafe.exists()) {
-					return fileUnsafe.delete();
+					if (isSamePath(basePath, fullPath) || FileUtils.directoryContains(directory, fileUnsafe)) {
+						return fileUnsafe.delete();
+					}
 				}
-			} else {
-				throw new IOException(
-						String.format("Path validation failed: \"%s\" not in \"%s\"", diskRoot, subPath)
-				);
+				return false;
+			} catch (IOException e) {
+				logger.error("Error while deleting file", e);
+			} catch (IllegalArgumentException ignore) {
 			}
-		} catch (IOException e) {
-			logger.error("Error while deleting file", e);
-		}
-		return false;
+			return false;
+		});
+	}
+
+	private EntRuntimeException mkPathValidationErr(String diskRoot, String fullPath) {
+		return new EntRuntimeException(
+				String.format("Path validation failed: \"%s\" not in \"%s\"", fullPath, diskRoot)
+		);
 	}
 
 	@SuppressWarnings("ResultOfMethodCallIgnored")
 	@Override
 	public void createDirectory(String subPath, boolean isProtectedResource) {
 		subPath = (null == subPath) ? "" : subPath;
-		String fullPath = this.createFullPath(subPath, isProtectedResource);
-		String diskRoot = (!isProtectedResource) ? this.getBaseDiskRoot() : this.getProtectedBaseDiskRoot();
-		try {
-			if (isSubPathOf(diskRoot, fullPath)) {
-				File dir = new File(fullPath);
-				if (!dir.exists() || !dir.isDirectory()) {
-					dir.mkdirs();
-				}
-			} else {
-				throw new IOException("Path traversal detected");
+		withValidPath(subPath, isProtectedResource, (basePath, fullPath) -> {
+			File dir = new File(fullPath);
+			if (!dir.exists() || !dir.isDirectory()) {
+				return dir.mkdirs();
 			}
-		} catch (IOException e) {
-			throw new EntRuntimeException("Error validating the path", e);
-		}
+			return false;
+		});
 	}
 
 	@Override
-	public void deleteDirectory(String subPath, boolean isProtectedResource) {
+	public void deleteDirectory(String subPath, boolean isProtectedResource) throws EntException {
 		subPath = (null == subPath) ? "" : subPath;
-		String fullPath = this.createFullPath(subPath, isProtectedResource);
-		String diskRoot = (!isProtectedResource) ? this.getBaseDiskRoot() : this.getProtectedBaseDiskRoot();
-		try {
-			File targetDir = new File(fullPath);
-			File baseDir = new File(diskRoot);
-			if (FileUtils.directoryContains(baseDir, targetDir)) {
-				this.delete(targetDir);
-			} else {
-				throw new IOException(
-						String.format("Path validation failed: \"%s\" not in \"%s\"", diskRoot, subPath)
-				);
+		withValidPath(subPath, isProtectedResource, (basePath, fullPath) -> {
+			try {
+				File targetDir = new File(fullPath);
+				File baseDir = new File(basePath);
+				if (FileUtils.directoryContains(baseDir, targetDir)) {
+					return this.delete(targetDir);
+				}
+			} catch (IOException e) {
+				logger.error("Error while deleting directory", e);
+			} catch (IllegalArgumentException ignore) {
 			}
-		} catch (IOException e) {
-			throw new EntRuntimeException("Error while deleting the directory", e);
-		}
+			return false;
+		});
 	}
 
 	private boolean delete(File file) {
@@ -163,11 +158,12 @@ public class LocalStorageManager implements IStorageManager {
 			String fullPath = this.createFullPath(subPath, isProtectedResource);
 			String diskRoot = (!isProtectedResource) ? this.getBaseDiskRoot() : this.getProtectedBaseDiskRoot();
 			File file = new File(fullPath);
-			if (FileUtils.directoryContains(new File(diskRoot), file)) {
+			if (isSamePath(diskRoot, fullPath) || FileUtils.directoryContains(new File(diskRoot), file)) {
 				if (file.exists() && !file.isDirectory()) {
 					return new FileInputStream(file);
 				}
 			}
+		} catch (IllegalArgumentException ignore) {
 		} catch (Throwable t) {
 			logger.error("Error extracting stream", t);
 			throw new EntException("Error extracting stream", t);
@@ -295,19 +291,25 @@ public class LocalStorageManager implements IStorageManager {
 
 	@Override
 	public String createFullPath(String subPath, boolean isProtectedResource) {
-		subPath = (null == subPath) ? "" : subPath;
-		String diskRoot = (!isProtectedResource) ? this.getBaseDiskRoot() : this.getProtectedBaseDiskRoot();
-		String resPath = this.createPath(diskRoot, subPath, false);
+		return withValidPath(subPath, isProtectedResource, (basePath, fullPath) -> fullPath);
+	}
+
+	@Override
+	public <T> T withValidPath(String resourceRelativePath, boolean isProtectedResource,
+							   BiFunction<String, String, T> bip) {
+		//-
+		resourceRelativePath = (resourceRelativePath == null) ? "" : resourceRelativePath;
+		String basePath = (!isProtectedResource) ? this.getBaseDiskRoot() : this.getProtectedBaseDiskRoot();
+		String fullPath = this.createPath(basePath, resourceRelativePath, false);
 		try {
-			if (!isSubPathOf(diskRoot, resPath, true)) {
-				throw new IOException(
-						String.format("Path traversal detected: \"%s\" not in \"%s\"", resPath, diskRoot)
-				);
+			if (isSubPathOf(basePath, fullPath, true)) {
+				return bip.apply(basePath, fullPath);
+			} else {
+				throw mkPathValidationErr(basePath, fullPath);
 			}
-		} catch (IOException e) {
-			throw new EntRuntimeException("Error validating the path", e);
+		} catch (IOException ex) {
+			throw mkPathValidationErr(basePath, fullPath);
 		}
-		return resPath;
 	}
 
 	private String createPath(String basePath, String subPath, boolean isUrlPath) {
@@ -347,7 +349,7 @@ public class LocalStorageManager implements IStorageManager {
 
 		try {
 			File directory = new File(fullPath);
-			if (FileUtils.directoryContains(new File(diskRoot), directory)) {
+			if (isSamePath(diskRoot, fullPath) || FileUtils.directoryContains(new File(diskRoot), directory)) {
 				if (directory.exists() && directory.isDirectory()) {
 					BasicFileAttributeView[] objects = new BasicFileAttributeView[]{};
 					String folder = fullPath;
@@ -366,9 +368,10 @@ public class LocalStorageManager implements IStorageManager {
 					return objects;
 				}
 			}
-		} catch (IOException ignore) {
+		} catch (IOException|IllegalArgumentException ignore) {
 		}
-		return null;
+
+		return new BasicFileAttributeView[]{};
 	}
 
 	protected BasicFileAttributeView[] addChild(BasicFileAttributeView elementToAdd, BasicFileAttributeView[] objects) {
@@ -433,19 +436,28 @@ public class LocalStorageManager implements IStorageManager {
 		return isSubPathOf(basePath, pathToCheck, false);
 	}
 
-	public static boolean isSubPathOf(String basePath, String pathToCheck, boolean baseIncludesBase) throws
-			IOException {
+	public static boolean isSubPathOf(String basePath, String pathToCheck, boolean baseIncludesBase) throws IOException {
 		basePath = FilenameUtils.normalize(basePath);
 		if (!basePath.endsWith("/")) basePath = basePath.concat("/");
 		pathToCheck = FilenameUtils.normalize(pathToCheck);
-		if (FilenameUtils.directoryContains(basePath, pathToCheck)) {
-			return true;
-		} else {
-			if (baseIncludesBase && basePath.equals(pathToCheck)) {
+		try {
+			if (FilenameUtils.directoryContains(basePath, pathToCheck)) {
 				return true;
 			} else {
-				return false;
+				if (baseIncludesBase && basePath.equals(pathToCheck)) {
+					return true;
+				} else {
+					return false;
+				}
 			}
+		} catch (IllegalArgumentException ignore) {
+			return false;
 		}
+	}
+
+	public static boolean isSamePath(String path1, String path2) {
+		if (!path1.endsWith("/")) path1 = path1.concat("/");
+		if (!path2.endsWith("/")) path2 = path2.concat("/");
+		return path1.equals(path2);
 	}
 }

@@ -22,10 +22,8 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
-import org.entando.entando.aps.system.init.DatabaseManager;
 import org.entando.entando.ent.exception.EntRuntimeException;
 import org.entando.entando.ent.util.EntLogging.EntLogger;
 import org.entando.entando.ent.util.EntLogging.EntLogFactory;
@@ -150,18 +148,28 @@ public class LocalStorageManagerIntegrationTest extends BaseTestCase {
     public void testCreateDirectoryShouldBlockPathTraversals() throws Throwable {
         try {
             this._localStorageManager.createDirectory("/../../../dev/mydir", false);
-            assert(false);
-        } catch (EntRuntimeException t) {
-            Assert.assertThat(t.getCause().getMessage(), CoreMatchers.startsWith("Path traversal detected"));
+            fail("Shouldn't reach this point");
+        } catch (EntRuntimeException e) {
+            Assert.assertThat(e.getMessage(), CoreMatchers.startsWith("Path validation failed"));
         } catch (Throwable t) {
-            assert(false);
+            fail("Shouldn't reach this point");
+        }
+
+        try {
+            this._localStorageManager.deleteDirectory("/../../../dev/mydir", false);
+        } catch (EntRuntimeException e) {
+            Assert.assertThat(e.getMessage(), CoreMatchers.startsWith("Path validation failed"));
+        } catch (Throwable t) {
+            fail("Shouldn't reach this point");
         }
 
         try {
             this._localStorageManager.createDirectory("target/mydir", false);
-            assert(true);
         } catch (Throwable t) {
-            assert(false);
+            fail("Shouldn't reach this point");
+        } finally {
+            this._localStorageManager.deleteDirectory("target/mydir", false);
+            this._localStorageManager.deleteDirectory("target", false);
         }
     }
 

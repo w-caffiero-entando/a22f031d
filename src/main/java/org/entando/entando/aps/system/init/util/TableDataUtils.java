@@ -331,7 +331,7 @@ public class TableDataUtils {
             String aux;
             BufferedReader br = new BufferedReader(clob.getCharacterStream());
             while ((aux = br.readLine()) != null) {
-                strOut.append(aux);
+                strOut.append(aux).append(System.lineSeparator());
             }
         } catch (Throwable t) {
             _logger.error("Error extracting clob value", t);

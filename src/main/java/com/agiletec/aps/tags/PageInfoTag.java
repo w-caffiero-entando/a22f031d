@@ -13,6 +13,18 @@
  */
 package com.agiletec.aps.tags;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import javax.servlet.ServletRequest;
+import javax.servlet.jsp.JspException;
+
+import org.entando.entando.aps.tags.ExtendedTagSupport;
+import org.entando.entando.ent.util.EntLogging.EntLogger;
+import org.entando.entando.ent.util.EntLogging.EntLogFactory;
+
 import com.agiletec.aps.system.RequestContext;
 import com.agiletec.aps.system.SystemConstants;
 import com.agiletec.aps.system.services.lang.ILangManager;
@@ -24,16 +36,6 @@ import com.agiletec.aps.system.services.url.PageURL;
 import com.agiletec.aps.tags.util.IParameterParentTag;
 import com.agiletec.aps.util.ApsProperties;
 import com.agiletec.aps.util.ApsWebApplicationUtils;
-import org.entando.entando.aps.tags.ExtendedTagSupport;
-import org.entando.entando.ent.util.EntLogging.EntLogFactory;
-import org.entando.entando.ent.util.EntLogging.EntLogger;
-
-import javax.servlet.ServletRequest;
-import javax.servlet.jsp.JspException;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * Returns the information of the specified page. This tag can use the sub-tag
