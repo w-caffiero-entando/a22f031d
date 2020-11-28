@@ -34,7 +34,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -84,7 +83,7 @@ public class FileBrowserControllerIntegrationTest extends AbstractControllerInte
                 .perform(get("/fileBrowser").param("protectedFolder", "false")
                         .header("Authorization", "Bearer " + accessToken));
         result.andExpect(status().isOk());
-        result.andDo(print());
+        result.andDo(resultPrint());
         result.andExpect(jsonPath("$.payload", Matchers.hasSize(2)));
         result.andExpect(jsonPath("$.payload[0].name", is("conf")));
         result.andExpect(jsonPath("$.payload[0].protectedFolder", is(false)));

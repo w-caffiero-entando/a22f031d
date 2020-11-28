@@ -33,4 +33,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -DskipPostDeploymentTests=false -DskipPreDeploymentTests=false
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+      - name: Test
+        #if: contains(github.event.pull_request.labels.*.name, 'run-full-test-suite')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B verify -DskipPostDeploymentTests=false -DskipPreDeploymentTests=false

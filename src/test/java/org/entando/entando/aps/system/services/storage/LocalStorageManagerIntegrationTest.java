@@ -109,6 +109,18 @@ public class LocalStorageManagerIntegrationTest extends BaseTestCase {
         assertEquals(3, fileCounter);
     }
 
+    public void testGetStreamShouldBlockPathTraversal() throws Throwable {
+        String testFilePath = "../testfolder/test.txt";
+
+        try {
+            this._localStorageManager.getStream(testFilePath, false);
+        } catch (EntRuntimeException e) {
+            Assert.assertThat(e.getMessage(), CoreMatchers.startsWith("Path validation failed"));
+        } catch (Throwable t) {
+            fail("Shouldn't reach this point");
+        }
+    }
+
     public void testSaveEditDeleteFile() throws Throwable {
         String testFilePath = "testfolder/test.txt";
         InputStream stream = this._localStorageManager.getStream(testFilePath, false);
@@ -142,6 +154,28 @@ public class LocalStorageManagerIntegrationTest extends BaseTestCase {
             this._localStorageManager.deleteDirectory("testfolder/", false);
             InputStream streamBis = this._localStorageManager.getStream(testFilePath, false);
             assertNull(streamBis);
+        }
+    }
+
+    public void testCreateDeleteFileShouldBlockPathTraversals() throws Throwable {
+        String testFilePath = "../../testfolder/test.txt";
+        String content = "Content of new text file";
+
+        try {
+            this._localStorageManager.saveFile(testFilePath, false, new ByteArrayInputStream(content.getBytes()));
+        } catch (EntRuntimeException e) {
+            Assert.assertThat(e.getMessage(), CoreMatchers.startsWith("Path validation failed"));
+        } catch (Throwable t) {
+            fail("Shouldn't reach this point");
+        }
+
+        try {
+            this._localStorageManager.deleteFile(testFilePath, false);
+            fail("Shouldn't reach this point");
+        } catch (EntRuntimeException e) {
+            Assert.assertThat(e.getMessage(), CoreMatchers.startsWith("Path validation failed"));
+        } catch (Throwable t) {
+            fail("Shouldn't reach this point");
         }
     }
 

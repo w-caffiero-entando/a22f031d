@@ -21,63 +21,96 @@ import java.io.IOException;
 
 public class LocalStorageManagerTest extends TestCase {
 
-    public void testIsSubPathOf() throws IOException {
+    public void testDoesPathContainsPath() throws IOException {
         assertTrue(
-                LocalStorageManager.isSubPathOf("/etc", "/etc/x")
+                LocalStorageManager.doesPathContainsPath("/etc", "/etc/x")
         );
         assertTrue(
-                LocalStorageManager.isSubPathOf("/etc/", "/etc/x")
+                LocalStorageManager.doesPathContainsPath("/etc/", "/etc/x")
         );
         assertTrue(
-                LocalStorageManager.isSubPathOf("/etc", "/etc//x")
+                LocalStorageManager.doesPathContainsPath("/etc", "/etc//x")
         );
         assertFalse(
-                LocalStorageManager.isSubPathOf("/etc", "/etcx/x")
+                LocalStorageManager.doesPathContainsPath("/etc", "/etcx/x")
         );
         assertFalse(
-                LocalStorageManager.isSubPathOf("/etc", "/etc /x")
+                LocalStorageManager.doesPathContainsPath("/etc", "/etc /x")
         );
         assertTrue(
-                LocalStorageManager.isSubPathOf("/etc", "/etc/./x")
+                LocalStorageManager.doesPathContainsPath("/etc", "/etc/./x")
         );
         assertTrue(
-                LocalStorageManager.isSubPathOf("/etc", "/etc//x")
+                LocalStorageManager.doesPathContainsPath("/etc", "/etc//x")
         );
         assertTrue(
-                LocalStorageManager.isSubPathOf("/etc", "/etc/zz/../x")
+                LocalStorageManager.doesPathContainsPath("/etc", "/etc/zz/../x")
         );
         assertTrue(
-                LocalStorageManager.isSubPathOf("/etc", "/etc/zz/./../x")
+                LocalStorageManager.doesPathContainsPath("/etc", "/etc/zz/./../x")
         );
         assertTrue(
-                LocalStorageManager.isSubPathOf("/etc", "/etc/../etc/x")
+                LocalStorageManager.doesPathContainsPath("/etc", "/etc/../etc/x")
         );
         assertFalse(
-                LocalStorageManager.isSubPathOf("/etc", "/etc/../etc /x")
+                LocalStorageManager.doesPathContainsPath("/etc", "/etc/../etc /x")
         );
         assertTrue(
-                LocalStorageManager.isSubPathOf("/etc", "/etc/../etc/ x")
+                LocalStorageManager.doesPathContainsPath("/etc", "/etc/../etc/ x")
         );
         assertTrue(
-                LocalStorageManager.isSubPathOf("/etc", "/etc/...")   // "..." is a proper fil/dir name
+                LocalStorageManager.doesPathContainsPath("/etc", "/etc/...")   // "..." is a proper fil/dir name
         );
         assertTrue(
-                LocalStorageManager.isSubPathOf("/etc", "/etc/.../etc/x")   // "..." is a proper fil/dir name
+                LocalStorageManager.doesPathContainsPath("/etc", "/etc/.../etc/x")   // "..." is a proper fil/dir name
         );
         assertFalse(
-                LocalStorageManager.isSubPathOf("/etc", "/etc/../../etc/x")
+                LocalStorageManager.doesPathContainsPath("/etc", "/etc/../../etc/x")
         );
         assertFalse(
-                LocalStorageManager.isSubPathOf("/etc", "/etc/../../z/etc/x")
+                LocalStorageManager.doesPathContainsPath("/etc", "/etc/../../z/etc/x")
         );
         assertFalse(
-                LocalStorageManager.isSubPathOf("/etc", "/etc/../..//etc/x")
+                LocalStorageManager.doesPathContainsPath("/etc", "/etc/../..//etc/x")
         );
         assertFalse(
-                LocalStorageManager.isSubPathOf("/etc", "/etx/x")
+                LocalStorageManager.doesPathContainsPath("/etc", "/etx/x")
         );
         assertFalse(
-                LocalStorageManager.isSubPathOf("/etc", "/etx/../x")
+                LocalStorageManager.doesPathContainsPath("/etc", "/etx/../x")
+        );
+        assertFalse(
+                LocalStorageManager.doesPathContainsPath("/a/b/c", "/a/b/c", false)
+        );
+        assertFalse(
+                LocalStorageManager.doesPathContainsPath("/a/b/c/", "/a/b/c", false)
+        );
+        assertTrue(
+                LocalStorageManager.doesPathContainsPath("/a/b/c", "/a/b/c", true)
+        );
+        assertTrue(
+                LocalStorageManager.doesPathContainsPath("/a/b/c/", "/a/b/c", true)
+        );
+        assertTrue(
+                LocalStorageManager.doesPathContainsPath("/a/b/../b/c/", "/a/b/c", true)
+        );
+    }
+
+    public void testIsSamePath() {
+        assertTrue(
+            LocalStorageManager.isSamePath("a/b/c","a/b/c/")
+        );
+        assertTrue(
+            LocalStorageManager.isSamePath("a/b/../b/c","a/b/c/")
+        );
+    }
+
+    public void testIsSamePathString() {
+        assertTrue(
+            LocalStorageManager.isSamePathString("a/b/c","a/b/c/")
+        );
+        assertFalse(
+            LocalStorageManager.isSamePathString("a/b/../b/c","a/b/c/")
         );
     }
 }

@@ -102,7 +102,7 @@ public class FileTextReader {
         try {
             byte[] buffer = new byte[1024];
             int length = -1;
-            if (LocalStorageManager.isSubPathOf(javaTempDirRoot, tempFilePath)) {
+            if (LocalStorageManager.doesPathContainsPath(javaTempDirRoot, tempFilePath)) {
                 outStream = new FileOutputStream(tempFilePath);
                 while ((length = is.read(buffer)) != -1) {
                     outStream.write(buffer, 0, length);

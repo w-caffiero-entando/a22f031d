@@ -29,6 +29,7 @@ import java.util.function.BiFunction;
 public class LocalStorageManager implements IStorageManager {
 
 	private static final EntLogger logger = EntLogFactory.getSanitizedLogger(LocalStorageManager.class);
+	private static final String ERROR_EXTRACTING_STREAM_DESC = "Error extracting stream";
 
 	private String baseURL;
 	private String baseDiskRoot;
@@ -74,7 +75,7 @@ public class LocalStorageManager implements IStorageManager {
 	@Override
 	public boolean deleteFile(String subPath, boolean isProtectedResource) {
 		subPath = (null == subPath) ? "" : subPath;
-		return withValidPath(subPath, isProtectedResource, (basePath, fullPath) -> {
+		return withValidFullPath(subPath, isProtectedResource, (basePath, fullPath) -> {
 			try {
 				File fileUnsafe = new File(fullPath);
 				File directory = new File(basePath);
@@ -102,7 +103,7 @@ public class LocalStorageManager implements IStorageManager {
 	@Override
 	public void createDirectory(String subPath, boolean isProtectedResource) {
 		subPath = (null == subPath) ? "" : subPath;
-		withValidPath(subPath, isProtectedResource, (basePath, fullPath) -> {
+		withValidFullPath(subPath, isProtectedResource, (basePath, fullPath) -> {
 			File dir = new File(fullPath);
 			if (!dir.exists() || !dir.isDirectory()) {
 				return dir.mkdirs();
@@ -114,7 +115,7 @@ public class LocalStorageManager implements IStorageManager {
 	@Override
 	public void deleteDirectory(String subPath, boolean isProtectedResource) throws EntException {
 		subPath = (null == subPath) ? "" : subPath;
-		withValidPath(subPath, isProtectedResource, (basePath, fullPath) -> {
+		withValidFullPath(subPath, isProtectedResource, (basePath, fullPath) -> {
 			try {
 				File targetDir = new File(fullPath);
 				File baseDir = new File(basePath);
@@ -156,17 +157,20 @@ public class LocalStorageManager implements IStorageManager {
 		try {
 			subPath = (null == subPath) ? "" : subPath;
 			String fullPath = this.createFullPath(subPath, isProtectedResource);
-			String diskRoot = (!isProtectedResource) ? this.getBaseDiskRoot() : this.getProtectedBaseDiskRoot();
+			String basePath = (!isProtectedResource) ? this.getBaseDiskRoot() : this.getProtectedBaseDiskRoot();
 			File file = new File(fullPath);
-			if (isSamePath(diskRoot, fullPath) || FileUtils.directoryContains(new File(diskRoot), file)) {
+			if (FileUtils.directoryContains(new File(basePath), file)) {
 				if (file.exists() && !file.isDirectory()) {
 					return new FileInputStream(file);
 				}
 			}
 		} catch (IllegalArgumentException ignore) {
+		} catch (EntRuntimeException e) {
+			logger.error(ERROR_EXTRACTING_STREAM_DESC, e);
+			throw e;
 		} catch (Throwable t) {
-			logger.error("Error extracting stream", t);
-			throw new EntException("Error extracting stream", t);
+			logger.error(ERROR_EXTRACTING_STREAM_DESC, t);
+			throw new EntException(ERROR_EXTRACTING_STREAM_DESC, t);
 		}
 		return null;
 	}
@@ -291,18 +295,18 @@ public class LocalStorageManager implements IStorageManager {
 
 	@Override
 	public String createFullPath(String subPath, boolean isProtectedResource) {
-		return withValidPath(subPath, isProtectedResource, (basePath, fullPath) -> fullPath);
+		return withValidFullPath(subPath, isProtectedResource, (basePath, fullPath) -> fullPath);
 	}
 
 	@Override
-	public <T> T withValidPath(String resourceRelativePath, boolean isProtectedResource,
-							   BiFunction<String, String, T> bip) {
+	public <T> T withValidFullPath(String resourceRelativePath, boolean isProtectedResource,
+								   BiFunction<String, String, T> bip) {
 		//-
 		resourceRelativePath = (resourceRelativePath == null) ? "" : resourceRelativePath;
 		String basePath = (!isProtectedResource) ? this.getBaseDiskRoot() : this.getProtectedBaseDiskRoot();
 		String fullPath = this.createPath(basePath, resourceRelativePath, false);
 		try {
-			if (isSubPathOf(basePath, fullPath, true)) {
+			if (doesPathContainsPath(basePath, fullPath, true)) {
 				return bip.apply(basePath, fullPath);
 			} else {
 				throw mkPathValidationErr(basePath, fullPath);
@@ -432,11 +436,25 @@ public class LocalStorageManager implements IStorageManager {
 		return allowedEditExtensions;
 	}
 
-	public static boolean isSubPathOf(String basePath, String pathToCheck) throws IOException {
-		return isSubPathOf(basePath, pathToCheck, false);
+	/**
+	 * Tells if a actual path is contained in another actual path
+	 * Note that for this function a path doesn't contain itself
+	 *
+	 * @see #doesPathContainsPath(String, String, boolean)
+	 */
+	public static boolean doesPathContainsPath(String basePath, String pathToCheck) throws IOException {
+		return doesPathContainsPath(basePath, pathToCheck, false);
 	}
 
-	public static boolean isSubPathOf(String basePath, String pathToCheck, boolean baseIncludesBase) throws IOException {
+	/**
+	 * Tells if a actual path is contained in another actual path
+	 *
+	 * @param basePath         the path that should contain
+	 * @param pathToCheck      the path that should be contained
+	 * @param baseIncludesBase if the paths are the same path, function returns this result
+	 * @throws IOException throw by the internal use of {@link FilenameUtils#directoryContains}
+	 */
+	public static boolean doesPathContainsPath(String basePath, String pathToCheck, boolean baseIncludesBase) throws IOException {
 		basePath = FilenameUtils.normalize(basePath);
 		if (!basePath.endsWith("/")) basePath = basePath.concat("/");
 		pathToCheck = FilenameUtils.normalize(pathToCheck);
@@ -444,18 +462,28 @@ public class LocalStorageManager implements IStorageManager {
 			if (FilenameUtils.directoryContains(basePath, pathToCheck)) {
 				return true;
 			} else {
-				if (baseIncludesBase && basePath.equals(pathToCheck)) {
-					return true;
-				} else {
-					return false;
-				}
+				return baseIncludesBase && isSamePathString(basePath, pathToCheck);
 			}
 		} catch (IllegalArgumentException ignore) {
 			return false;
 		}
 	}
 
+	/**
+	 * Tells if two actual paths are equivalent
+	 */
 	public static boolean isSamePath(String path1, String path2) {
+		path1 = FilenameUtils.normalize(path1);
+		path2 = FilenameUtils.normalize(path2);
+		if (!path1.endsWith("/")) path1 = path1.concat("/");
+		if (!path2.endsWith("/")) path2 = path2.concat("/");
+		return path1.equals(path2);
+	}
+
+	/**
+	 * Tells if two path string expressions are equivalent, BUT doesn't compare the actual path
+	 */
+	public static boolean isSamePathString(String path1, String path2) {
 		if (!path1.endsWith("/")) path1 = path1.concat("/");
 		if (!path2.endsWith("/")) path2 = path2.concat("/");
 		return path1.equals(path2);

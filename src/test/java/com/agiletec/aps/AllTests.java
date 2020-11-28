@@ -45,6 +45,8 @@ import com.agiletec.aps.system.services.widgettype.TestWidgetType;
 import com.agiletec.aps.system.services.widgettype.TestWidgetTypeDAO;
 import com.agiletec.aps.system.services.widgettype.TestWidgetTypeDOM;
 import com.agiletec.aps.system.services.widgettype.TestWidgetTypeManager;
+import com.agiletec.aps.tags.PageInfoTagTest;
+import com.agiletec.aps.util.FileTextReaderTest;
 import com.agiletec.aps.util.TestHtmlHandler;
 import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
@@ -80,6 +82,7 @@ import org.entando.entando.aps.system.services.i18n.TestApiI18nLabelInterface;
 import org.entando.entando.aps.system.services.oauth2.*;
 import org.entando.entando.aps.system.services.page.PageTokenManagerTest;
 import org.entando.entando.aps.system.services.storage.LocalStorageManagerIntegrationTest;
+import org.entando.entando.aps.system.services.storage.LocalStorageManagerTest;
 import org.entando.entando.aps.system.services.storage.StorageManagerUtilTest;
 import org.entando.entando.aps.system.services.userprofile.TestApiUserProfileInterface;
 import org.entando.entando.aps.system.services.userprofile.UserProfileManagerAspectTest;
@@ -93,7 +96,6 @@ import org.entando.entando.aps.util.FilterUtilsTest;
 import org.entando.entando.aps.util.crypto.CompatiblePasswordEncoderTest;
 import org.entando.entando.aps.util.crypto.DefaultTextEncryptorTest;
 import org.entando.entando.ent.util.EntSafeXmlUtilsTest;
-import org.entando.entando.web.analysis.AnalysisControllerTest;
 import org.entando.entando.web.common.IgnoreJacksonWriteOnlyAccessTest;
 import org.entando.entando.web.common.model.RestNamedIdTest;
 import org.entando.entando.web.swagger.SwaggerConfigTest;
@@ -107,6 +109,12 @@ public class AllTests {
     public static Test suite() {
         TestSuite suite = new TestSuite("Test for APS");
         
+        //
+        suite.addTest(new JUnit4TestAdapter(FileTextReaderTest.class));
+        //
+        suite.addTest(new JUnit4TestAdapter(LocalStorageManagerTest.class));
+        //
+        suite.addTest(new JUnit4TestAdapter(PageInfoTagTest.class));
         //
         suite.addTest(new JUnit4TestAdapter(RestNamedIdTest.class));
         //

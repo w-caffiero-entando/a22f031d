@@ -10,7 +10,7 @@
     <groupId>org.entando.entando</groupId>
     <artifactId>entando-engine</artifactId>
     <packaging>jar</packaging>
-    <version>6.2.0-SNAPSHOT</version>
+    <version>6.3.0-SNAPSHOT</version>
     <name>Entando Engine Scan Test</name>
     <description>Entando Engine: an agile, modern and user-centric open source Portal platform.</description>
     <url>http://www.entando.com/</url>
@@ -38,8 +38,11 @@
         </repository>
     </repositories>
     <properties>
-        <sonar.projectKey>entando_repository-scan-test</sonar.projectKey>
+        <!--sonar.projectKey>entando_repository-scan-test</sonar.projectKey>
         <sonar.organization>entando</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url-->
+        <sonar.projectKey>w-caffiero-entando_7c22cff7</sonar.projectKey>
+        <sonar.organization>w-caffiero-entando</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <checkstyle.skip>true</checkstyle.skip>
@@ -289,9 +292,8 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
+            <version>${log4j-core.version}</version>
         </dependency>
-        <!--##############################-->
-        <!--##############################-->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
@@ -308,8 +310,6 @@
             <version>${log4j-core.version}</version>
             <scope>runtime</scope>
         </dependency>
-        <!--##############################-->
-        <!--##############################-->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>

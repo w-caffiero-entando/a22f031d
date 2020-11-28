@@ -59,7 +59,7 @@ public interface IStorageManager extends Serializable {
 
 	public String createFullPath(String subPath, boolean isProtectedResource) throws EntException;
 
-	public <T> T withValidPath(String resourceRelativePath, boolean isProtectedResource,
-							   BiFunction<String, String, T> bip);
+	public <T> T withValidFullPath(String resourceRelativePath, boolean isProtectedResource,
+								   BiFunction<String, String, T> bip);
 
 }
