@@ -177,7 +177,7 @@ public class AbstractControllerIntegrationTest {
         }
     }
 
-    boolean restResultPrintIsEnabled = ("" + System.getProperty("test.result.enablePrint")).equals("true");
+    boolean restResultPrintIsEnabled = ("" + System.getProperty("org.entando.test.enableResultPrint")).equals("true");
 
     public ResultHandler resultPrint() {
         return (restResultPrintIsEnabled)

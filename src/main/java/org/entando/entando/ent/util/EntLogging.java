@@ -754,7 +754,7 @@ public class EntLogging {
 
         public void warn(String format, String arg) {
             if (delegate.isWarnEnabled()) {
-                delegate.warn(fms.sanitize(format), svs.sanitize(arg));
+                delegate.warn(fms.sanitize(format), svs.sanitize(arg));     //NOSONAR
             }
         }
 
@@ -932,7 +932,7 @@ public class EntLogging {
 
         public void error(String format, String arg) {
             if (delegate.isErrorEnabled()) {
-                delegate.error(fms.sanitize(format), svs.sanitize(arg));
+                delegate.error(fms.sanitize(format), svs.sanitize(arg));    //NOSONAR
             }
         }
 

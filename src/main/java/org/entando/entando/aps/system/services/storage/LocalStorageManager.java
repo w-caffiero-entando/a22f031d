@@ -75,7 +75,7 @@ public class LocalStorageManager implements IStorageManager {
 	@Override
 	public boolean deleteFile(String subPath, boolean isProtectedResource) {
 		subPath = (null == subPath) ? "" : subPath;
-		return withValidFullPath(subPath, isProtectedResource, (basePath, fullPath) -> {
+		return withValidResourcePath(subPath, isProtectedResource, (basePath, fullPath) -> {
 			try {
 				File fileUnsafe = new File(fullPath);
 				File directory = new File(basePath);
@@ -85,9 +85,8 @@ public class LocalStorageManager implements IStorageManager {
 					}
 				}
 				return false;
-			} catch (IOException e) {
-				logger.error("Error while deleting file", e);
-			} catch (IllegalArgumentException ignore) {
+			} catch (IOException | IllegalArgumentException e) {
+				handleStorageFunctionProblem(e, "Error while deleting file");
 			}
 			return false;
 		});
@@ -99,11 +98,9 @@ public class LocalStorageManager implements IStorageManager {
 		);
 	}
 
-	@SuppressWarnings("ResultOfMethodCallIgnored")
 	@Override
 	public void createDirectory(String subPath, boolean isProtectedResource) {
-		subPath = (null == subPath) ? "" : subPath;
-		withValidFullPath(subPath, isProtectedResource, (basePath, fullPath) -> {
+		withValidResourcePath(subPath, isProtectedResource, (basePath, fullPath) -> {
 			File dir = new File(fullPath);
 			if (!dir.exists() || !dir.isDirectory()) {
 				return dir.mkdirs();
@@ -115,16 +112,15 @@ public class LocalStorageManager implements IStorageManager {
 	@Override
 	public void deleteDirectory(String subPath, boolean isProtectedResource) throws EntException {
 		subPath = (null == subPath) ? "" : subPath;
-		withValidFullPath(subPath, isProtectedResource, (basePath, fullPath) -> {
+		withValidResourcePath(subPath, isProtectedResource, (basePath, fullPath) -> {
 			try {
 				File targetDir = new File(fullPath);
 				File baseDir = new File(basePath);
 				if (FileUtils.directoryContains(baseDir, targetDir)) {
 					return this.delete(targetDir);
 				}
-			} catch (IOException e) {
-				logger.error("Error while deleting directory", e);
-			} catch (IllegalArgumentException ignore) {
+			} catch (IOException | IllegalArgumentException e) {
+				handleStorageFunctionProblem(e, "Error while deleting directory");
 			}
 			return false;
 		});
@@ -164,12 +160,9 @@ public class LocalStorageManager implements IStorageManager {
 					return new FileInputStream(file);
 				}
 			}
-		} catch (IllegalArgumentException ignore) {
-		} catch (EntRuntimeException e) {
-			logger.error(ERROR_EXTRACTING_STREAM_DESC, e);
-			throw e;
+		} catch (IOException | IllegalArgumentException | EntRuntimeException e) {
+			handleStorageFunctionProblem(e, ERROR_EXTRACTING_STREAM_DESC);
 		} catch (Throwable t) {
-			logger.error(ERROR_EXTRACTING_STREAM_DESC, t);
 			throw new EntException(ERROR_EXTRACTING_STREAM_DESC, t);
 		}
 		return null;
@@ -295,12 +288,12 @@ public class LocalStorageManager implements IStorageManager {
 
 	@Override
 	public String createFullPath(String subPath, boolean isProtectedResource) {
-		return withValidFullPath(subPath, isProtectedResource, (basePath, fullPath) -> fullPath);
+		return withValidResourcePath(subPath, isProtectedResource, (basePath, fullPath) -> fullPath);
 	}
 
 	@Override
-	public <T> T withValidFullPath(String resourceRelativePath, boolean isProtectedResource,
-								   BiFunction<String, String, T> bip) {
+	public <T> T withValidResourcePath(String resourceRelativePath, boolean isProtectedResource,
+									   BiFunction<String, String, T> bip) {
 		//-
 		resourceRelativePath = (resourceRelativePath == null) ? "" : resourceRelativePath;
 		String basePath = (!isProtectedResource) ? this.getBaseDiskRoot() : this.getProtectedBaseDiskRoot();
@@ -372,7 +365,8 @@ public class LocalStorageManager implements IStorageManager {
 					return objects;
 				}
 			}
-		} catch (IOException|IllegalArgumentException ignore) {
+		} catch (IOException | IllegalArgumentException e) {
+			handleStorageFunctionProblem(e, "Error while listing attributes");
 		}
 
 		return new BasicFileAttributeView[]{};
@@ -434,6 +428,21 @@ public class LocalStorageManager implements IStorageManager {
 
 	public String getAllowedEditExtensions() {
 		return allowedEditExtensions;
+	}
+
+	@SuppressWarnings("java:S1871")
+	public void handleStorageFunctionProblem(Exception e, String msg) {
+		if (e instanceof IOException) {
+			// Invalid access cases, like non-existent paths
+			logger.warn(msg, e);
+		} else if (e instanceof IllegalArgumentException) {
+			// Invalid argument cases, like file instead of dir or null values
+			logger.warn(msg, e);
+		} else if (e instanceof EntRuntimeException) {
+			// Explicitly handled low-level cases like path validation errors
+			logger.debug(msg, e);
+			throw (EntRuntimeException) e;
+		}
 	}
 
 	/**
